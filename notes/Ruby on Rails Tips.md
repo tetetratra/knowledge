@@ -1,0 +1,139 @@
+---
+tags: "Rails, Ruby_on_Rails, require, SPA, CSRF, Passkey, 認証"
+---
+
+# Ruby on Rails Tips
+
+- `rails s -p 3001`でport指定立ち上げ
+- rails 以外でRuby拡張使うには`require 'active_support/core_ext'`
+- `secret_token`とは
+  - [Railsのsecret_key_baseを理解する（翻訳）｜TechRacho（テックラッチョ）〜エンジニアの「？」を「！」に〜｜BPS株式会社](https://techracho.bpsinc.jp/?p=46809)
+  - cookie暗号化・署名時の鍵(暗号化の種みたいな)
+  - `config/secrets.yml` に書くか、環境変数`SECRET_KEY_BASE`を設定するか。
+  - 鍵生成には`bundle exec rake secret`が使われがち
+- gemならgemfileだけど、jsのライブラリとかを使いたいときってリポジトリ管理どうするの
+- Railsコンソール内で、たとえば`method(:link_to)`とかをしてみたいときとかにどうするか
+  - [Ruby の Method オブジェクトとは - Qiita](https://qiita.com/scivola/items/f1f8d3b5593f3b61f25a)
+  - `helper.method(:link_to)` とやるとできる
+  - path系は`app.users_path`
+- [ridgepoleの紹介 - Qiita](https://qiita.com/tetz-akaneya/items/d10570aeb028fc603b86)
+  - マイグレーションの面倒さを避けたい
+  - [クックパッドにおける最近のActiveRecord運用事情 - クックパッド開発者ブログ](https://techlife.cookpad.com/entry/2014/08/28/194147)
+- `rails c --sandbox`で、コンソール終了時にロールバックされる
+- `<%= debug(params) if Rails.env.development? %>` でいい感じにデバッグに使える
+- session
+  - どちらかといえばrails寄り
+  - 保存先を決められる
+  - ブラウザ落としたら破棄
+- cookies
+  - どちらかといえばブラウザ、HTTP寄り
+  - 期限は自在
+- ログレベルの設定
+  - [Railsのログを理解する-ログの基礎知識- - Qiita](https://qiita.com/sobameshi0901/items/b963e7046e2ae8b8e813)
+- バッチ処理をしたいとき
+  - [Railsでバッチを書く時によく使うrails runnerとrake taskの違い - Qiita](https://qiita.com/rllllho/items/672e336a03335cba6b34)
+    - rails runner は rails 環境でスクリプトが実行されるのが良さそう
+    - rake はDSLで書けて、依存関係とかを自動解決してくれるのが良さそう
+- pry-rails を入れるとそれだけで`rails c`がpryになる。
+  - `_`とかが使えるように。
+- `params.to_unsafe_h`でparamsのpretty printに使える
+  - [pretty print - Format Params in Rails Server Logs - Stack Overflow](https://stackoverflow.com/questions/49340929/format-params-in-rails-server-logs)
+- createとかでも暗黙指定のviewが呼ばれるのがあるの、忘れやすいから注意
+- has_secure_password
+  - DBとパスワードのやりとりを透過的にすることができるRailsの機能
+  - まず前提として、パスワードを生でデータベースに入れるのはだめ。
+  - ハッシュ化したものを入れて、認証のときは「POSTされたパスワードのハッシュ値」と「データベースのハッシュ値」を比べて判定する
+  - 使う準備
+    - Bcrypt gemを入れる
+    - モデル定義にこのメソッド使う
+    - DBにはpassword_digest というカラムを定義する
+  - 使い方
+    - 仮想的なpasswordというカラムが使えるようになる
+    - 認証用のメソッドが追加される
+    - passwordカラムには軽いバリデーションが追加される
+    - フォームによくある「パスワード確認」欄用の仮想的なカラムも使えるようになる
+      - 使わないこともできる
+  - モデルを定義するときに継承する、ActiveRecore::Base
+    - がincludeしてる、SecurePassword モジュール(名前これだったか怪しい)
+      - ここにある
+      - ホントはここじゃなくて、もう一つ深い階層の、ClassMethodsモジュールに定義されている
+        - includeされたときのフック処理が書かれていて、名前空間気にせずこのメソッド呼べたり、カラム名がメソッド名になるようにメタプロされてたりする
+  - リファレンスには書いてない仕様(使ってて詰まった)
+    - ふつーに文字列指定するとハッシュ化されたのを入れてくれる(これは書いてある)
+    - nil入れるとNULLが入る
+    - 空文字だと何も処理せずに終わる
+      - よくあるプロフィール更新ページの、パスワード欄を空で更新したらパスワードはそのまま、という実装がラク
+- [voormedia/rails-erd: Generate Entity-Relationship Diagrams for Rails applications](https://github.com/voormedia/rails-erd)
+  - ER図を書ける
+  - [【Rails】ER図作成 - Qiita](https://qiita.com/M_S_0525/items/88c0cf9b806b677057a6)
+- `change_table bulk: true`でテーブル変更の高速化
+  - 1つの`ALTER TABLE`になる
+  - [「change_table」で「bulk: true」を使用したマイグレーションの高速化（Rails） - ryotaku's Tech Blog](https://www.ryotaku.com/entry/2019/08/29/000000)
+- ログのフォーマットは `L, [日付と時刻 プロセスID] LEVEL メッセージ`
+  - 例: `I, [2021-10-11T07:03:56.686545 #27]  INFO -- : `
+  - (docker内なら)プロセスIDはdocker内でpsしないと見れないのちょっと注意
+  - https://docs.ruby-lang.org/ja/latest/class/Logger=3a=3aFormatter.html
+- [class Rake::TestTask - Documentation for Ruby 2.1.0](https://docs.ruby-lang.org/en/2.1.0/Rake/TestTask.html)
+  - `rake test TEST=path/to/test_file_name.rb`
+- Lograge
+  - Railsのログをいい感じにするgem
+  - https://github.com/roidrage/lograge
+- 定数の自動読み込み
+  - めっちゃムズ
+  - Rails5まではClassic, 6からはZeitwerk
+  - [定数の自動読み込みと再読み込み (Zeitwerk) - Railsガイド](https://railsguides.jp/autoloading_and_reloading_constants.html)
+  - [定数の自動読み込みと再読み込み (Classic) - Railsガイド](https://railsguides.jp/autoloading_and_reloading_constants_classic_mode.html#%E7%89%B9%E7%95%B0%E3%82%AF%E3%83%A9%E3%82%B9%E5%86%85%E3%81%A7%E8%87%AA%E5%8B%95%E8%AA%AD%E3%81%BF%E8%BE%BC%E3%81%BF%E3%82%92%E8%A1%8C%E3%81%86)
+  - [Classic から Zeitwerk への移行 - Railsガイド](https://railsguides.jp/classic_to_zeitwerk_howto.html)
+  - 自動読み込みパス（autoload path）
+    - >自動読み込みパス（autoload path）とは、その中身が自動読み込みの対象となるアプリケーションディレクトリを指します（app/modelsなど）。これらのディレクトリはルート名前空間`Object`を表します。
+- Zeitwerk（ツァイトヴェルク）のしくみ
+  - [fxn/zeitwerk: Efficient and thread-safe code loader for Ruby](https://github.com/fxn/zeitwerk)
+    - リポジトリ
+  - [定数の自動読み込みと再読み込み (Zeitwerk) - Railsガイド](https://railsguides.jp/autoloading_and_reloading_constants.html)
+    - 動き方の解説
+    - 未定義のクラス（定数）があったとき、そのクラス名からパスを推測して、クラスの定義ファイルを見つける
+  - [週刊Railsウォッチ（20190128）Rails 6のオートローダーがZeitwerkに置き換わる？Rails 6はRuby 2.5が必須、最近のSQLiteほか｜TechRacho by BPS株式会社](https://techracho.bpsinc.jp/?p=68986)
+    - >「で、Railsでは従来const_missingが使われていていろいろ限度があったけど、ZeitwerkではKernel#autoloadを使ってるのか」
+    - [Module#autoload (Ruby 3.0.0 リファレンスマニュアル)](https://docs.ruby-lang.org/ja/latest/method/Module/i/autoload.html)
+      - `autoload(const_name, feature) -> nil`
+      - >定数 const_name を最初に参照した時に feature を Kernel. するように設定します。
+  - [Rails アップグレードガイド - Railsガイド](https://railsguides.jp/upgrading_ruby_on_rails.html#%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%AE%E6%A7%8B%E6%88%90)
+    - >ただしclassicモードは、見つからない定数名からファイル名を推測しますが（underscore）、zeitwerkモードはファイル名から定数名を推測します（camelize）。
+    - >特に略語がからむ場合、これらのヘルパーの動作が互いにきれいに逆になるとは限りません。
+    - >たとえば、"FOO".underscoreは"foo"になりますが、 "foo".camelizeは"FOO"ではなく"Foo"になります。
+- Railsエンジン
+  - [Rails エンジン入門 - Railsガイド](https://railsguides.jp/engines.html)
+    - >エンジン (engine) は、ホストとなるRailsアプリケーションに機能を提供するミニチュア版Railsアプリケーションとみなせます。
+    - 普通のRailsアプリと似た構成
+  - エンジンとして提供されているGem例
+    - devise
+  - [Rails エンジンによる脱 Microservices 化のススメ · DeNA Engineers' Blog](https://engineer.dena.com/posts/2016.12/rails-engine-microservices/)
+    - >そこで、Model 層を含む共通部分を Rails エンジンとして実装し、View, Controller を実装するそれぞれの Rails アプリケーションから利用する形を取ることにしました。
+    - > これにより、アプリケーションとしては分離しつつ、共通部分を再利用することで、開発を効率よく進めることができるようになりました。
+  - [Gem、Railtieプラグイン、Engine（full/mountable）の違いとそれぞれの基礎情報 - Qiita](https://qiita.com/kidach1/items/565c2c077ae8d15fe3a8)
+- >config.load_defaultsは、渡されたバージョンまでのデフォルト値を含む新しいデフォルト値を設定します。たとえば6.0を指定すると、6.0以前のあらゆるバージョンのデフォルト値も取得できます。
+  - https://railsguides.jp/configuring.html#load-defaultsの結果
+- `new_framework_defaults.rb`とは
+  - `rails app:update`すると作られる
+  - 新しいRailsにおけるデフォルトの設定が書かれていて、最初は全てコメントアウトされている
+  - 全てコメントアウトを外せたら、`config.load_defaults 最新バージョン`とする
+- Railsでちょっと試したいとき
+  - ローカルを汚さない方法
+  - `docker run --rm -v=$PWD:/app -it ruby:3.2.0-preview1-bullseye bash`
+  - `gem install rails`
+  - `cd app && rails new .`
+- オープンソースRailsアプリ色々
+  - [著名なオープンソースRailsアプリのapp/以下を見る](https://zenn.dev/takahashim/articles/ac725fb16ec7a11809c5)
+- SPAでCSRFするときはjsでhtmlからcsrf tokenを取ってリクエストに埋め込むのが一般的っぽい
+- [asset_syncを利用してS3に静的アセットをアップロード、CloudFrontで高速配信を行う](https://zenn.dev/tanktabox/articles/722e4ca4cb7052#asset_sync%E3%81%AE%E5%B0%8E%E5%85%A5)
+  - アセットを本番で使うdocker imageに含めないようにしてimageのダイエットをできる
+- [Passkeys を完全に理解するために Rails で実装してみた with Remix - STORES Product Blog](https://product.st.inc/entry/2023/12/12/222708)
+- `credentials.yml`のgit diffを見る方法
+  - https://linyclar.github.io/rails_memos/commands/credentials/#:~:text=git%20diffで復号済の内容でdiffを見れるようにするにはbin/rails%20credentials%3Adiff%20--enrollを実行する%E3%80%82
+  - 手順
+    - `bin/rails credentials:diff --enroll`を実行する
+      - .gitattributes に行が追加される
+    - `EDITOR=vim bin/rails credentials:edit` を実行する
+      - .git/configに行が追加される
+    - `git diff`を実行する
+- `mysql`コマンドを打たなくても`bin/rails db`でmysqlのコンソールに入れる
