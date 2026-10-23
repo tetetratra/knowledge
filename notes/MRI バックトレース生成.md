@@ -1,0 +1,81 @@
+---
+tags: "Ruby, MRI, YARV, バックトレース, MRIのオブジェクト, Rubyのウラガワ"
+---
+
+# MRI バックトレース生成
+
+- vm_backtrace.c を`Init_vm_backtrace`から追う
+  - `rb_cBacktrace = rb_define_class_under(rb_cThread, "Backtrace", rb_cObject);`
+    - クラスを作っている
+    - `rb_cThread`の直下に作っているから、Rubyだと`Thread::Backtrace`クラスのこと
+    - `rb_undef_method(CLASS_OF(rb_cBacktrace), "new")`しているから、newできないクラス
+  - `rb_cBacktraceLocation = rb_define_class_under(rb_cBacktrace, "Location", rb_cObject);`
+    - `Thread::Backtrace::Location` (`caller_locations` で得られるのはこの配列)
+    - これも`rb_undef_method(CLASS_OF(rb_cBacktraceLocation), "new");`している
+    - `rb_undef_alloc_func(rb_cBacktraceLocation);`はどういう意味だろう
+    - to_sは`rb_define_method(rb_cBacktraceLocation, "to_s", location_to_str_m, 0);`
+    - caller_locationsは`rb_define_global_function("caller_locations", rb_f_caller_locations, -1);`
+      - `return ec_backtrace_to_ary(GET_EC(), argc, argv, 1, 1, 0);`
+  - `ec_backtrace_to_ary`
+    - `rb_scan_args(argc, argv, "02", &level, &vn);`
+      - https://docs.ruby-lang.org/ja/latest/function/rb_scan_args.html
+      - `fmt: "02"` は、必須0個、省略可能2個
+    - `caller_locations(0)`の場合は`lev = 1, n = ALL_BACKTRACE_LINES = -1`が入るっぽい
+      - 無引数で呼び出した場合は、 `lev = 2, n = ALL_BACKTRACE_LINES = -1`っぽい
+    - `btval = rb_ec_partial_backtrace_object(ec, lev, n, &too_large, FALSE, FALSE)`
+      - `(0)`で呼んだなら`(ec, lev=1, n=-1, &too_large, skip_internal, do_yield)`
+      - `too_large`は戻り値を受け取る変数。用途不明
+    - `rb_ec_partial_backtrace_object(ec, start_frame=1, num_frames=-1, start_too_large, skip_internal=FALSE, do_yield=FALSE)`
+      - 本体っぽい
+  - `rb_ec_partial_backtrace_object`
+    - `VALUE btobj = backtrace_alloc(rb_cBacktrace);`をreturnしている
+      - `backtrace_alloc`では、`VALUE obj = TypedData_Make_Struct(klass, rb_backtrace_t, &backtrace_data_type, bt);`をreturnしている
+        - `TypedData_Make_Struct`を調べていたら良いgistを見つけた [extension.ja.rdoc -- extension library](https://gist.github.com/yugui/87ef6964d8a76794be6f)
+          - >Cの構造体の割当と対応するオブジェクトの生成を同時に行うマクロ
+    - `GetCoreDataFromValue(btobj, rb_backtrace_t, bt);`
+      - `bt`に戻り値が入るマクロ
+      - `struct RData`の`void *data`フィールドを取得し、`rb_backtrace_t`に型変換している
+      - `RData` は汎用の型だっけ?
+        - MRIのオブジェクト#6263c6a7a7b03c0000420590
+        - `RTypedData` と同じ?
+      - `btobj`がまだ空なんだから戻り値`bt`も空のはず
+        - そのあとで`bt->backtrace = ...`とかをしているから、これは代入用のアドレス取得をしている (`bt`への代入で、間接的に`btobj`を作り上げている)
+    - `bt->backtrace = ZALLOC_N(rb_backtrace_location_t, num_frames);`, `bt->backtrace_size = 0;` で初期化している
+    - `else if (num_frames < 0 ||`だから、`num_frames = size;`で、`num_frames` にはフレームのサイズが入る
+    - forループ `for (; cfp != end_cfp && (bt->backtrace_size < num_frames); cfp = RUBY_VM_PREVIOUS_CONTROL_FRAME(cfp))`
+      - 現在のcfpから過去のcfpであるend_cfpまで遡る
+      - `cfp->iseq`を見て、cfpがiseqかどうかで場合分け
+        - iseqのとき
+          - `cfp`の`iseq`, `pc`を取り出す
+          - 戻り値 `loc = &bt->backtrace[bt->backtrace_size++]` を埋めていく
+          - `loc->type = LOCATION_TYPE_ISEQ;` (定数 1)
+          - `loc->iseq = iseq;`
+          - `loc->pc = pc;`
+          - `if (do_yield)`はfalseだから無視
+        - iseqではないとき
+          - `loc->type = LOCATION_TYPE_CFUNC;`
+          - `loc->iseq = NULL;`
+          - `loc->pc = NULL;`
+          - `loc->mid = rb_vm_frame_method_entry(cfp)->def->original_id;`
+            - `rb_vm_frame_method_entry`では、`ep`をアクセスリンクに沿って遡り、最初に見つかったmethod entry (`ep[VM_ENV_DATA_INDEX_ME_CREF = -2]`に入っている)をreturnしている
+              - 遡る理由が謎。1番目のcfpにmethod entryが入っていないのはどんなケースなんだろう
+            - `mid`は`ID`型
+              - Rubyのウラガワでなんの型なのかを説明していた気がする
+  - 文字列化 `location_to_str_m`→`location_to_str(rb_backtrace_location_t *loc)`
+  - `location_to_str`
+    - `loc`から`file`, `name`, `lineno`を取得する
+    - `loc->type`で分岐
+      - iseq
+        - `file = rb_iseq_path(loc->iseq);`
+        - `name = ISEQ_BODY(loc->iseq)->location.label;`
+        - `lineno = calc_lineno(loc->iseq, loc->pc);`
+      - cfunc
+        - cfuncでもiseqが取れる場合があるらしい。
+          - 取れるとき
+            - `file, lineno`はiseqと同じ
+          - 取れないとき
+            - `file = GET_VM()->progname;`
+            - `lineno = 0;`
+        - `name = rb_id2str(loc->mid);`
+    - →`location_format`
+      - Stringの組み立て
