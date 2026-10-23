@@ -1,11 +1,12 @@
 ---
-tags: "WebRTC, RTCPeerConnection, P2P, SDP, ICE, ICE Candidate, NAT, STUN, TURN"
+tags: "WebRTC, RTCPeerConnection, P2P, SDP, ICE, ICE Candidate"
 ---
 
-# 連載 | WebRTC入門2016 | HTML5Experts.jp
+# WebRTCとPeerConnection
 
 - [連載 | WebRTC入門2016 | HTML5Experts.jp](https://html5experts.jp/series/webrtc2016/)
-  - カメラを使ってみよう
+
+- カメラを使ってみよう
     - WebRTCとは
       - Web Real-Time Communication
       - Webブラウザ上でビデオ/オーディオの通信や、データ通信を行うための規格
@@ -61,25 +62,3 @@ a=ice-pwd:xxxxxxxxxxxx
 ```
 
 - SDPには 通信を始める側(Offer)と、通信を受け入れる側(Answer) があり、Offer → Answerの順番でやりとりする
-- シグナリングサーバーを動かそう
-  - （この文脈における）シグナリングサーバーとは：↑の SDP と ICE candidate を仲介するサーバー
-  - websocket接続でシンプルなシグナリングサーバーを立ち上げていた
-- シグナリングを拡張して、複数人で通信してみよう
-  - 複数人それぞれで相互に接続する必要がある（ので、人数増えると大変）
-  - ![図](../assets/c4c227c80896742e85e6a56f86b28f0dc294a3161eabec057aa4db32aba3ee18.png)
-  - やりかた自体は力技で複数接続を確立させればよい
-- Firebaseで楽々シグナリング
-- そして壁の向こうへ。
-  - NAT越え
-    - NATを越えてPeer-to-Peer通信を行うには、シグナリング処理でお互いに自分の知らないグローバルの情報（自身のグローバルIPアドレスや、グローバルUDPポート）を交換する必要がある
-      - → STUNに問い合わせて知る
-  - STUN (Session Traversal Utilities for NATs)
-    - STUNサーバー：NATで変換されたIPアドレス/ポートを教えあげるサーバー（仕組みはシンプル）
-      - Googleが公開してくれている (`stun.l.google.com:19302` など)
-    - ![図](../assets/1093191704c7e6062b0f53f79b0faeba187ffafd70952c3496e0e223b6095caf.png)
-  - TURN (Traversal Using Relays around NAT)
-    - NAT超えができたところで、Peer-to-Peer通信に使う自身のポート自体が、自身のファイアウォールに塞がれている可能性がある（特に企業ネットワークなど）
-    - TURNというしくみを使うことで、それを解決できる
-      - TURNサーバーが、パケットをそのまま転送するしくみ
-        - `80/TCP` ポートを使うように設定することで、ファイアウォールに阻まれずに済む
-    - ![図](../assets/ee6988d1759be6d14d5addf7aedb361d202cf65a7a61eebcaef69cf5f2b0352e.png)
