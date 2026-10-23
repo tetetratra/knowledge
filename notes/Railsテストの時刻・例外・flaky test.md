@@ -50,6 +50,8 @@ end
     - https://github.com/willnet/ci_logger
       - 失敗したテストのログだけ出す
     - 失敗時の動作の動画化
+
+![flaky testの対策](../assets/7c5ab6bc0559fc32cc3fe5f036f78906927bb93dfbafa15580b98f9b94de2e01.png)
     - [https://gyazo.com/7e28dd368b88ba12bc3a930547bbc5f9]
 - `perform_enqueued_jobs`
   - 入った[ActiveJob]を同期実行ためのヘルパーメソッド
