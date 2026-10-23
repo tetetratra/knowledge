@@ -1,0 +1,5 @@
+---
+tags: "メール, SaaS"
+---
+
+# sendgrid
