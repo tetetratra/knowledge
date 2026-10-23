@@ -1,0 +1,77 @@
+---
+tags: "docker-compose"
+---
+
+# Docker
+
+- docker-composeも
+  - [ボリュームの利用 | Docker ドキュメント](https://matsuand.github.io/docs.docker.jp.onthefly/storage/volumes/)
+  - [dockerコンテナのデータを永続化する方法 - RAKUS Developers Blog | ラクス エンジニアブログ](https://tech-blog.rakus.co.jp/entry/20200331/docker)
+    - 永続化したいものはホスト側のdocker管理ディレクトリをコンテナにマウントする(`volume`)ことで、コンテナを消しても残るようにする。
+    - >ボリュームとは、Docker コンテナーにおいて生成され利用されるデータを、永続的に保持する目的で利用される仕組みです。 バインドマウント はホストマシン OS のディレクトリ構造に依存しますが、ボリュームは**完全に Docker によって管理されます**
+  - 既存のコンテナがなにかで壊れていて、`docker exec -it bash` からのコマンドが打てないときは、`run --rm`を使うといいのかも。
+    - 例: `docker-compose run --rm container_name bundle install --force`
+  - [Dockerコマンド一覧 - Qiita](https://qiita.com/nimusukeroku/items/72bc48a8569a954c7aa2)
+    - `stop container_name`
+      - コンテナの停止
+    - `rm container_name`
+      - コンテナの削除
+    - `restart container_name`
+    - `exec -it container_name bash`
+    - 新しいプロセスでそのコマンドを実行する
+    - ので、Ctrl-Cで終了しても大丈夫
+    - `attach container_name`
+      - PID1につなげる
+      - ので、Ctrl-Cでコンテナが終了してしまう
+      - `Ctrl-P, Ctrl-Q`で抜ける
+    - `ps`
+      - psで`0.0.0.0:4500->3000/tcp`のようになっているのは、ローカルの4500がdockerの3000につながっている、ということ
+    - `docker cp [オプション] コンテナ:パス ローカルパス`
+      - ローカルからコンテナに移すときはパスを逆に
+      - [cp — Docker-docs-ja 19.03 ドキュメント](https://docs.docker.jp/engine/reference/commandline/cp.html)
+  - pid1問題
+    - 指定したプロセスがpidが1で起動されるので、SIGXXXとかがその指定したプロセスに対して働かない問題
+  - [docker-compose コマンドまとめ - Qiita](https://qiita.com/wasanx25/items/d47caf37b79e855af95f#exec)
+    - `down`
+      - コンテナも消す
+    - `stop`
+      - コンテナは停止するだけ
+    - `logs`
+    - `kill`
+    - `build`
+      - サービスのビルドを実行
+    - `up`
+      - コンテナを作成して起動
+      - `-d`をつけるとバックグラウンド
+      - サービス名を引数につけてもOK
+    - `exec`
+      - docker execコマンドと同じ
+      - シェルとかから呼ぶと、ttyが無いというエラーが出る。`-T`オプションで回避できる
+        - [crontabでdocker-compose execを実行すると"the input device is not a TTY"が出る - Qiita](https://qiita.com/nasutaro211/items/513b351ee057ec19f8b0)
+  - [【Docker】Rails開発で知っておきたい！gemの永続化による作業効率アップの話 | Enjoy IT Life](https://nishinatoshiharu.com/datavolume-for-gem/)
+  - `buildx`
+    - そもそもdocker imageは、複数のアーキテクチャを一つのイメージに内包できる
+      - `amd64, arm32v6` など
+      - [マルチ CPU アーキテクチャのサポートを活用 — Docker-docs-ja 19.03 ドキュメント](https://docs.docker.jp/docker-for-mac/multi-arch.html)
+        - >Docker イメージはマルチ・アーキテクチャ（multi-architecture）をサポートしています。つまり１つのイメージ内に、異なるアーキテクチャを含んでいたり、稀に Windows のような異なるオペレーティングシステムを含むことがあります。
+    - >このイメージを x86_64 / amd64 マシン上で実行しようとすると、 x86_64 対応版を自動的に取得・実行します。
+      - 使っているPCのCPUのアーキテクチャに応じて、それに合うイメージを取得してくれる
+    - buildxコマンドを使うと、一気に複数のアーキテクチャ対応のイメージを作ることができる
+  - buildkit
+    - [BuildKitを使ってKubernetes上でイメージをビルドする KubeCon EU発表レポート | by Akihiro Suda | nttlabs | Medium](https://medium.com/nttlabs/buildkit-on-kubernetes-d37a03150192)
+    - >BuildKitとは
+    - > BuildKitは、Docker/OCIコンテナイメージを高速かつセキュアにビルドするためのツールキットです。
+    - > BuildKitは、Dockerfileの各命令間の依存性をDAG (有向非巡回グラフ)として表現することにより、命令の並行実行や、正確なキャッシュ判定を実現します。また、プライベートなGitリポジトリへの安全なアクセスを可能にしたり、非rootユーザでの実行を可能にしたりするなど、セキュリティ関連の機能も数多く盛り込まれています。
+  - docker-compose.yml のポート指定は、`ports "ホスト側:コンテナ側"`
+  - `links`
+    - >links は自サービスが他のサービスからアクセスできるように、追加でエイリアスを定義するものです。 これはサービス間の通信を行うために必要となるわけではありません。 デフォルトにおいてサービスは、サービス名を使って他サービスにアクセスできます。 以下の例においては、db は web からアクセス可能であり、ホスト名 db あるいは database を使ってアクセスできます。
+    - [Compose のネットワーク機能 — Docker-docs-ja 19.03 ドキュメント](https://docs.docker.jp/compose/networking.html#links)
+    - `package.json`の`"proxy"`とかで指定した名前で別のコンテナのネットワークにアクセスできるらしい
+      - どうなっているのか不明
+    - 使用例: [reactjs - Proxying API Requests in Docker Container running react app - Stack Overflow](https://stackoverflow.com/questions/59003599/proxying-api-requests-in-docker-container-running-react-app)
+  - [Railsアプリの開発環境向けDockerfile + docker-compose.yml - アジャイルSEの憂鬱](https://sinsoku.hatenablog.com/entry/2021/03/24/100000)
+  - docker-compose.override.yml というファイルにオプションを書き、 docker-compose.yml を拡張できる
+    - [Compose 設定をファイルとプロジェクト間で共有 — Docker-docs-ja 20.10 ドキュメント](https://docs.docker.jp/compose/extends.html)
+  - [《滅びの呪文》Docker Composeで作ったコンテナ、イメージ、ボリューム、ネットワークを一括完全消去する便利コマンド  - Qiita](https://qiita.com/suin/items/19d65e191b96a0079417)
+    - `docker compose down --rmi all --volumes --remove-orphans`
+    - volumeだけでいいなら `docker compose down --volumes`
