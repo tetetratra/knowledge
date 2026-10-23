@@ -30,6 +30,8 @@ def validate(root):
         except (ValueError, TypeError):
             errors.append(f'{label}: tagsはダブルクォート付き文字列にする')
         body = parts[2].strip()
+        if re.search(r'^\s*(?:table|code):\S+', body, re.M):
+            errors.append(f'{label}: Scrapboxのコード・表マーカーが未変換')
         if not body.startswith('# '):
             errors.append(f'{label}: 記事タイトルがない')
         prose, fence = [], None
