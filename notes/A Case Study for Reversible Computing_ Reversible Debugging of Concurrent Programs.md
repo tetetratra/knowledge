@@ -1,0 +1,50 @@
+---
+tags: "Reversible Computing, 可逆計算, 並列処理, 並列計算, ハイゼンバグ, 因果整合性, Causal-consistent reversibility, Debugging Backwards in Time"
+---
+
+# A Case Study for Reversible Computing: Reversible Debugging of Concurrent Programs
+
+- Reversible Computing
+- [A Case Study for Reversible Computing: Reversible Debugging of Concurrent Programs | Semantic Scholar](https://www.semanticscholar.org/paper/A-Case-Study-for-Reversible-Computing%3A-Reversible-Hoey-Lanese/baf843da48f335b33fb3e664a86a109cabbd0eb5#references)
+- [A Case Study for Reversible Computing: Reversible Debugging of Concurrent Programs | Connected Papers](https://www.connectedpapers.com/main/baf843da48f335b33fb3e664a86a109cabbd0eb5/A-Case-Study-for-Reversible-Computing%3A-Reversible-Debugging-of-Concurrent-Programs/graph)
+- **abstruct**
+- >Abstract. Reversible computing allows one to run programs not only in the usual forward direction, but also backward. A main application area for reversible computing is debugging, where one can use reversibility to go backward from a visible misbehaviour towards the bug causing it. While reversible debugging of sequential systems is well understood, reversible debugging of concurrent and distributed systems is less settled. We present here two approaches for debugging concurrent programs, one based on backtracking, which undoes actions in reverse order of execution, and one based on causal consistency, which allows one to undo any action provided that its consequences, if any, are undone beforehand. The first approach tackles an imperative language with shared memory, while the second one considers a core of the functional message-passing language Erlang. Both the approaches are based on solid formal foundations.
+- >概要 可逆演算により、プログラムを通常の順方向だけでなく逆方向にも実行できる。
+- > プログラムを実行することができる。可逆計算の主な応用分野として、デバッグ
+- > 可逆的コンピューティングの主な応用分野はデバッグである。
+- > 可逆性を利用して、目に見える誤動作からその原因となっているバグにさかのぼっていくことができる。
+- > デバッグである。逐次システムの可逆的デバッグはよく理解されているが、同時並行システムの可逆的デバッグはあまり知られていない。
+- > 並行システムや分散システムの可逆的デバッグは、あまり確立されていません。
+- > ここでは、並行プログラムのデバッグのための2つのアプローチを紹介する。
+- > 1つは、バックトラックに基づくもので、実行順序を逆にして動作を元に戻すものです。
+- > また、因果的整合性に基づくアプローチも紹介します。
+- > 因果関係整合性に基づくものである。最初の
+- > 前者は共有メモリを持つ命令型言語を対象とし、後者は機能型言語の中核をなす
+- > 第二は、関数型メッセージパシング言語である
+- > Erlangです。どちらのアプローチも確かな形式的基盤に基づいています。
+- **1 Introduction**
+  - 可逆計算
+    - 色々な応用のうちの一つがデバッグ
+    - 可逆デバッグ
+      - 並列処理や分散処理に対してはまだ非力
+  - 並列計算のデバッグ方法
+    - ハイゼンバグが消えないようにする必要がある。そのための以下の2つの方法がある
+    - バックトラック
+      - 実行の逆順に取り消す
+    - 因果整合性可逆性
+      - どの順番で取り消してもOK
+      - Lanese, I., Mezzina, C.A., Tiezzi, F.: Causal-consistent reversibility. Bull. EATCS 114, 121–139 (2014)
+        - http://bulletin.eatcs.org/index.php/beatcs/article/view/305
+  - 並行システムのデバッグに関する2つの研究ラインを紹介する(この論文で)
+    - 共有メモリを持つ並行命令型言語のバックトラックをサポート
+      - セクション3で紹介
+    - Erlangに対して因果整合性を持つ可逆性をサポート
+      - セクション4で紹介
+- **2 Airline Booking Example**
+  - 航空予約システムの例
+- **3 Backtracking in a Concurrent Imperative Language**
+- **5 Related Work**
+  - Debugging Backwards in Timeを引用している
+    - >32. Lewis, B.: Debugging backwards in time. In: Ronsse, M., Bosschere, K.D. (eds.)
+    - > Proceedings of the Fifth International Workshop on Automated Debugging
+    - > (AADEBUG 2003), pp. 225–235 (2003). https://arxiv.org/abs/cs/0310016
