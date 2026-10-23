@@ -38,7 +38,7 @@ tags: "', CSRF, json, PRGパターン, Websocket, Server-sent events, SPDY, QUIC
 - [Ruby on Rails 5のAPIモードと非APIモードのファイル差分 - Qiita](https://qiita.com/61503891/items/d4eda649a10a3494830c)
 - [Rails API モードから非 API モードに変えたときに動かなくなったあれこれ - とんかつ時々あんどーなつ](https://kasaharu.hatenablog.com/entry/20170219/1487508340)
 - [SPAの場合のセッション（Cookie）認証におけるCSRF対策 - Qiita](https://qiita.com/dadayama/items/a0022b8f5f453a188e19)
-- [RailsのCSRF保護を詳しく調べてみた（翻訳）｜TechRacho（テックラッチョ）〜エンジニアの「？」を「！」に〜｜BPS株式会社](https://techracho.bpsinc.jp/?p=46891)
+- [RailsのCSRF保護を詳しく調べてみた（翻訳）｜TechRacho（テックラッチョ）〜エンジニアの「？」を「！」に〜｜BPS株式会社](https://techracho.bpsinc.jp/hachi8833/2017_10_23/46891)
   - SPA部分でどうCSRFをやるか
 - PRGパターン
   - Post/Redirect/Get パターン
