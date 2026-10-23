@@ -1,5 +1,5 @@
 ---
-tags: "AWS, IAM, IAMユーザー, IAMグループ, IAMロール, IAMポリシー, **許可・禁止を設定するのはココ**, Assume Role"
+tags: "AWS, IAM, IAMユーザー, IAMグループ, IAMロール, IAMポリシー, Assume Role"
 ---
 
 # AWS IAM
