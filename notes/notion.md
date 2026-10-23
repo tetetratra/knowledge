@@ -1,5 +1,5 @@
 ---
-tags: ""
+tags: "Notion, タスク管理, ツール連携"
 ---
 
 # notion

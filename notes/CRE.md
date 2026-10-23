@@ -1,5 +1,5 @@
 ---
-tags: ""
+tags: "CRE, 信頼性"
 ---
 
 # CRE

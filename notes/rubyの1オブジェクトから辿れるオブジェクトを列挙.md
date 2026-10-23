@@ -1,5 +1,5 @@
 ---
-tags: ""
+tags: "Ruby, ObjectSpace, メモリ"
 ---
 
 # rubyの1オブジェクトから辿れるオブジェクトを列挙

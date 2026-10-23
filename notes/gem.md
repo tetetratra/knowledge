@@ -1,5 +1,5 @@
 ---
-tags: ""
+tags: "Ruby, gem"
 ---
 
 # gem
