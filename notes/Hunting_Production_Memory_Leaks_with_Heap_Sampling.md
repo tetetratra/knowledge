@@ -1,0 +1,50 @@
+---
+tags: "RubyKaigi_2022, Ruby, TracePoint"
+---
+
+# Hunting Production Memory Leaks with Heap Sampling
+
+- https://rubykaigi.org/2022/presentations/KnuX.html#day2
+- https://docs.google.com/presentation/d/113hN9O716UXfOHcbVbTB19wSVN_-RzM8jSOJ7cp9Wi0/edit
+  - what is heap profiling?
+    - 「プロダクションで環境のみメモリが急増する！」のような質問をされることがある
+      - App deployment
+      - OOM killerk
+    - グローバル変数に色々入れるとGCされないのでメモリリークする
+    - Heap profiling = point-in-time snapshot
+      - リクエスト前後で比較して、増えたオブジェクトを見える
+  - Existing heap memory profiling solutions
+    - 色々既存のgemがある
+      - ObjectSpaceとobjspace拡張によって作られている
+    - `Objectspace.trace_object_allocations_start`
+      - この処理のためにメモリを使ってしまう
+      - でかいHashを使ってしまう
+    - `Objectspace.dump_all`
+      - 機密情報もダンプしてしまう
+      - JSONでダンプ
+      - ギガバイト単位でダンプしてしまう(でかい)
+      - アプリを止めてしまう
+      - ↑定期的にダンプするようなことは難しい
+  - ruby_memprofiler_pprof gem
+    - https://github.com/zendesk/ruby_memprofiler_pprof
+    - 生きているオブジェクトのみをトラックする
+    - バイナリでダンプ
+    - スタックトレースのpush, popごとにオブジェクトを見ていく？
+    - visualizationがある
+      - goのpprofというツール
+    - 欠点：遅い & 多くのメモリを使う
+    - スタックトレースを集めるのは遅い
+      - 問題1：`Thread#backtrace_locations`が遅い
+      - 解決1：`RUBY_VM_NEXT_CONTROL_FRAME()`を直接叩く
+      - 問題2：寿命が短いオブジェクトにメモリを使ってしまう
+      - 解決2：flush(吐き出し)のときまで文字列を取得するのを遅らせる(defer)
+      - 問題3：GVLしてしまう
+      - 解決3-1：`rb_thread_call_without_gvl()`経由で呼び出す
+      - 解決3-2：`rb_thread_schedule()`を使う？
+        - ここはよくわからん
+  - リッチなバックトレースを取りたい
+    - Cを叩いてVMの情報を直接得る
+    - `rb_profile_frames`APIを拡張する？
+  - 今後
+    - 今はRubyのオブジェクトのみを追っている
+    - [function is_pointer_to_heap (Ruby 3.2 リファレンスマニュアル)](https://docs.ruby-lang.org/ja/latest/function/is_pointer_to_heap.html)
