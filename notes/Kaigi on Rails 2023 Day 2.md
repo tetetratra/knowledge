@@ -1,0 +1,194 @@
+---
+tags: "Kaigi on Rails, Rails, MySQL, オンラインDDL, devise"
+---
+
+# Kaigi on Rails 2023 Day 2
+
+- **day2**
+  - 返金処理を通して学ぶ、カード決済電文の沼バトル
+    - SMART BANK, B/43
+    - [返金処理を通して学ぶ、 カード決済電文の沼バトル -kaigi on rails 2023 - Speaker Deck](https://speakerdeck.com/hirotea/numa-battle-of-card-transactions)
+    - カード決済について
+  - 1. 実装した機能
+    - 明細分割
+  - 2. 決済処理の仕組み・実装方針の検討
+    - 方針
+      - 取引履歴テーブルのサブレコードテーブルを作ろうかな
+    - 要件：返金側のケアも要るよ！
+  - 3. 返品・返金処理
+    - 売上と同じような不ローデ返金処理も行われる
+  - 4. ケア
+  - 5. 沼
+    - 処理の到着パターンが色々ある
+    - 部分返金という処理もある
+    - 海外事務手数料もある
+    - 為替変動もある
+  - 6. vs沼
+    - フローを書き出した
+    - 全パターン列挙(数十パターン)
+  - 7. まとめ
+  - 32個のPRでリリースした依存度の高いコアなモデルの安全な弄り方
+    - [32個のPRでリリースした依存度の高いコアなモデルの安全な弄り方 - Speaker Deck](https://speakerdeck.com/shoheimitani/32ge-noprderirisusitayi-cun-du-nogao-ikoanamoderunoan-quan-nanong-rifang)
+    - 話題
+    - 1. MySQLのオンラインDDL
+    - 2. アプリケーションの作りを意識した安全なテーブル定義の変更手順
+    - 取引履歴テーブル
+      - でかい
+      - read/writeも多い
+      - 案件「ポイント(カラム)に無期限と期間限定の種類を付けたい」
+    - やりたいこと
+      - カラムの変更と新カラム追加
+      - 既存APPの実装を置き換え
+      - 無停止でリリース
+    - rails 7 & MySQL 8
+    - オンラインDDL
+      - MySQL 5.6~
+      - 特別な設定は必要なしにオンラインDDLになる
+        - どのような操作が対象かはMySQLのドキュメント参照
+    - 注意1: 対象外になるケース
+      - まとめて実行する処理のうち、のどれかが対象外だと全体的に対象外
+      - 5.5以前に作ったテーブルに対しては適用できない
+      - generated columnが存在するテーブルに対しては適用不可
+    - 注意2: メタデータロック
+      - 初期化→実行→コミット
+      - ![図](../assets/009dd4be1575ec7a526f31d6b5112433584073c31d6f1325a59eabd4d4d90ae4.png)
+      - 他の、ロックを取るトランザクション(上記図のAやB)があるとエラーになってしまう
+    - 注意3: その他
+      - 省略とのこと
+    - 考えたこと2つ目
+      - ECSのblue-greenデプロイの仕組み的に、状態が不一致する期間がある...
+        - 古いアプリから新しいDBにアクセスしてしまうことに...
+        - カラムのrenameできない
+      - 同じコードを色々な場所(API, JOB, etc...)にデプロイするので、状態不一致の考えることが多い
+      - レビューも大変(PRが巨大になる)
+      - カラムは「変更」ではなく、「(新しいのを)追加→置き換え→(古いのを)削除」で置き換えることにした
+    - リリース手順
+      - PR1: カラムの追加
+      - PR2: 値の同期
+        - 新旧両方カラムを埋める
+      - バックフィル
+        - = 過去データの補完
+        - タスクでやる
+        - 昨日の「update billilion record」参考になるかもらしい
+      - Not Null制約の追加
+      - 参照を置き換え
+        - アプリケーションコードを置き換えていく
+        - 古いカラムを使っている箇所を消す
+      - PR6: 同期の停止
+        - ここは失敗したらリカバリーが大変なので慎重に(よーくテスト書こう)
+      - ignored_columns
+      - カラムの削除
+        - (念のため&開発環境用に)remove_column時の型の指定を忘れずに
+    - strong_migrations というgemがある
+      - [strong_migrations gemのススメ - Money Forward Developers Blog](https://moneyforward-dev.jp/entry/2022/10/13/suggestion-strong-migrations-gem/)
+    - 参考文献：![図](../assets/b4ba7b0e426d53caa8d9e572ffbad3784e937c26c55910f0baced90b3aedc8d5.png)
+  - Multiple Databasesを用いて2つのRailsプロジェクトを統合する
+    - pixivノベルとpixivコミックの統合
+    - コードは一元化、DBは複数のまま
+    - DBスキーマをコミックに移す
+      - ノベル→コミックに色々コピー
+        - スキーマ
+        - 接続設定
+        - db/novel_migrate/* にマイグレーションを移す
+          - `rails db:migrate:primary`
+    - モデルのネームスペースを見て繋ぐDBを切り替える
+  - 管理機能アーキテクチャパターンの考察と実践
+    - [管理機能アーキテクチャパターンの考察と実践 / Learn Architecture through Admin - Speaker Deck](https://speakerdeck.com/ohbarye/learn-architecture-through-admin)
+    - 後回しにしがち
+      - 価値に直結しないから
+    - アーキテクチャ
+      - 密結合させる
+        - 楽
+        - これ系のgemは充実している
+        - スタートアップとかなら強い
+        - そのまま大きくなると大変
+      - 管理機能向けのbackendを再利用
+      - マイクロサービス化
+        - ドメインが一致しているならわざわざ分離させる必要ない
+      - アンチパターン：マイクロサービスで共有データベース (Distributed Monolith)
+  - APMをちゃんと使おうとしたら、いつのまにか独自gemを作っていた話
+    - はじめに
+      - APM: new relic, datadog など
+      - APM導入後、放置というのがあるある
+      - leaner社ではどうやっているかを消化い
+    - APMの使い方
+      - 全体
+        - リクエスト数や応答速度などを見る
+        - 異常値が合った場合はトリアージ
+      - エンドポイントごと
+        - 重くなったもののみを見る感じ
+    - パフォーマンス・チューニング
+      - N+1
+        - 細切れになっている場所はN+1の可能性
+      - スロークエリ
+        - 長いとき
+        - EXPLAINしよう
+    - gem作った
+      - 困ること
+        - どのMethodがsqlを発行したかわからん
+        - Rubyの処理が重い場合、自動で区切ってくれないので対処ができない
+          - `Datadog::Tracing`はインターフェースが使いにくい
+      - APM Traceable gem
+        - apm_traceable, apm_traceable-datadog の2つのgem
+      - しくみ
+        - prepended Moduleとかをつかったメタプロ
+    - 具体的な事例
+      - 事例1
+        - 5.7→8.0にしたとき遅くなった
+      - 事例2
+        - 外部API呼び出し
+        - パースが重かった
+          - did you mean が重かった...
+            - name errorが多発して、did you meanが多発していた...
+  - 数十億のレコードを持つ5年目サービスの設計と障害解決
+    - [数十億のレコードを持つ 5年目サービスの 設計と障害解決 - Speaker Deck](https://speakerdeck.com/knr/shu-shi-yi-norekodowochi-tu-5nian-mu-sabisuno-she-ji-tozhang-hai-jie-jue)
+    - Palcy(漫画アプリ)の開発
+    - DAU30万
+    - 履歴テーブルがでかい
+      - 0時が一番リクエストが多い
+  - 1. キャッシュを使う
+    - WebAPIで同一のデータを使うもの
+      - ユーザーに関わらないようなデータ
+    - Active Model Serializer
+      - expire期間もしていできる
+    - railsのバージョンが古いときのキャッシュを新しいバージョンで使うバグとかもある
+      - しっかり監視しよう
+    - Redisの容量対応
+      - 本番データをコピーして、Redisinsightを使って調査
+      - 無駄に多くキャッシュしないようにしよう
+  - 2. 不要なデータは使わない
+    - 特定ユーザーによるスロークエリがある
+      - 長期間利用しているユーザー
+      - お気に入り機能が重かった
+    - 対応
+      - 最初は100件のみ出して、もっと見たい人へは全件見せる
+        - ほとんどのユーザーはお気に入り100件もあれば十分
+  - 3. テーブルの形を適切にする
+    - DBの型エラー
+      - int→bigintにしないと治らない
+    - 他の箇所も直したいので、auto_incrementなカラムを全列挙
+    - 初期対応は機能停止
+    - 恒久対応
+      - 新テーブルを作る
+      - batchとafter_commitで新テーブルにデータを移して、最後にrename table
+      - pt-online-schema-changeではだめなのか？
+        - すでに実績が合った手法を使った
+  - Railsアプリにパスワードレス認証を導入した知見
+    - パスキー
+      - WebAuthnの拡張
+      - スマホやYubikeyで認証
+    - 仕様等の参考情報
+      - Googleのチュートリアルもある
+      - RFCもある
+    - 導入
+      - 登録：公開鍵を生成、登録する
+      - 認証：秘密鍵で認証する
+    - webauthn gemでできる
+    - ブラウザによっては未対応のものあり
+  - Hotwireを使って管理画面を簡単にプチSPA化する
+    - [yamataka22/kaigionrails2023-admin-modal: Kaigi on Rails 2023 Day2「Hotwireを使って管理画面を簡単にプチSPA化する」のサンプルコード](https://github.com/yamataka22/kaigionrails2023-admin-modal)
+    - 一覧ページから詳細ページを開くとき、モーダルで開けば戻ったときに状態が保持される
+    - TurboFrame + Stimlus
+  - 基調講演 A Decade of Rails Bug Fixes
+- 聞こう
+  - テーブル分割で実現するdeviseの責務の分離と柔軟な削除機構
