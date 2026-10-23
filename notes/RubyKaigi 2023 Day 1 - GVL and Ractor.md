@@ -1,0 +1,80 @@
+---
+tags: "RubyKaigi, Ruby, RubyKaigiA), Matz Keynote Yukihiro \"\"Matz\"\" Matsumoto, The future vision of Ruby Parser Yuichiro Kaneko, PEG, RubyKaigiB, Understanding the Ruby Global VM Lock by observing it, RubyKaigiA, \"Ractor\" reconsidered, MaNy, Plug & Play Garbage Collection with MMTk, Lazy Sweep, 世代別GC, ライトバリア, Incremental Marking, VWA, Immix, Scala, GHC, Rubinius, Inko, LXR, MMTk, Lightning Talks, RubyKaigiC, Implementing \"\"++\"\" operator, stepping into parse.y, Yet Another Ruby Parser, Splitting: the Crucial Optimization for Ruby Blocks Benoit Daloze, Reading and improving Pattern Matching in Ruby, Fitting Rust YJIT into CRuby Alan Wu, Tips and Tricks for working in the MRI Codebase, Optimizing YJIT’s Performance, from Inception to Production Maxime Chevalier-Boisvert, Ruby JIT Hacking Guide"
+---
+
+# RubyKaigi 2023 Day 1: GVLとRactor
+
+- [since:2023-05-11_14:10:00_JST until:2023-05-11_14:40:00_JST  - Twitter検索 / Twitter](https://twitter.com/search?q=since%3A2023-05-11_14%3A10%3A00_JST%20until%3A2023-05-11_14%3A40%3A00_JST%20%23RubyKaigiB&src=typed_query&f=live)
+  - (B) EN Understanding the Ruby Global VM Lock by observing it Ivo Anjo @KnuX
+    - デモで使ったコードなど：https://ivoanjo.me/rubykaigi2023/
+    - dd-trace-rb gem, gvl-tracing gem を作っている
+    - 0 story
+      - GVLはレイテンシに影響
+      - gvl-tracing gem https://github.com/ivoanjo/gvl-tracing
+    - 1 what GVL
+      - RubyはC(とRust)で書かれている
+      - Ruby threadとOS threadは1:1
+      - マルチスレッドにおけるCコードの正しさを保証するためにGVLがある
+    - 2 whati s the GVL not?
+      - GVLでも、並行実行はできるが、並列はできない
+      - コード実行時にロックを取れば、threadをたくさん作るコードでも正しく動く
+      - GVLはRubyの処理系を守るものであり、Rubyで書かれたのコードを守るもんではない
+      - JRubyやTruffleRubyは別の機構でGVLが必要ない実装になっている
+    - gvl-tracing gemを使って色々解析
+      - 100msごとにスレッドを切り替えている
+      - webアプリが遅いのは、処理の中身のせいではなく、リクエストが重複しているせいかも
+      - Ractorで解決
+      - shopify/gvltools gem
+      - 推測せずに計測、実験してみよう
+        - pumaでためしてみたり
+      - Rubyの未来は明るい
+        - Ractor, YJIT, MaNyProject, 10msでスレッド切り替えするようになる(かも)
+- スピーカーの方の記事
+- [Ruby’s unexpected I/O vs CPU unfairness - ivo's awfully random tech blog](https://ivoanjo.me/blog/2023/02/11/ruby-unexpected-io-vs-cpu-unfairness/)
+  - >入出力を実行するスレッドと CPU 処理を実行するスレッドを混在させると、I/O 処理が大幅に遅くなることに気づきました。
+  - IOのスレッドのみの場合、IOが完了したらその瞬間に読み込んだIOを処理できる。早い。
+  - IOのスレッドとCPUのスレッドがある場合、IOが終わったとしても、CPUのスレッドで100ms経たない限りはスレッドが移らず、結果的にIOのスレッドのレイテンシ(遅延)が大きくなってしまう
+  - `Thread.pass`メソッドを活用するとよい
+    - >他のスレッドに実行権を譲ります。実行中のスレッドの状態を変えずに、他の実行可能状態のスレッドに制御を移します。
+      - https://docs.ruby-lang.org/ja/latest/method/Thread/s/pass.html
+- まとめてくれている方
+- https://twitter.com/m4buya/status/1656528507718217728?s=20
+- [since:2023-05-11_14:50:00_JST until:2023-05-11_15:20:00_JST  - Twitter検索 / Twitter](https://twitter.com/search?q=since%3A2023-05-11_14%3A50%3A00_JST%20until%3A2023-05-11_15%3A20%3A00_JST%20%23RubyKaigiA&src=typed_query&f=live)
+  - (A) EN "Ractor" reconsidered Koichi Sasada @ko1
+    - or 2nd progress report of MaNy projects
+    - スライド：https://www.atdot.net/~ko1/activities/2023_rubykaigi2023.pdf
+    - Ractorの難しさ
+      - プログラミングモデルの難しさ
+      - エコシステム
+      - 実装の問題
+    - プログラミングモデルの難しさ
+      - オブジェクトをメモリ
+      - APIのルールが難しい
+    - エコシステムの難しさ
+      - 既存のライブラリはそのままじゃ使えない
+      - いくつかのプログラムはractore用に再設計する必要がある
+    - 実装の難しさ
+      - send/recieveは実装がかんたん
+      - rendezvous style (yield/take)の実装は難しい
+      - Ractor.select は滅茶苦茶難しい
+    - パフォーマンスの問題
+      - 竹内関数で、4つのracotorを使うと、普通の実行よりも3.7倍早い
+      - オブジェクトアロケーションをするコードだと2倍遅い
+    - オーバーヘッドの理由
+      - GCでは全部のractorがとまる
+      - Ractorごとにnative threadを作っている
+      - `Ractor.seleact(*rs)`はO(n)
+        - `select()` system callと同じオーダー
+    - 品質を上げて(今はココ)、沢山の人に使ってもらって、feedbackを得たい(良いサイクル)
+    - 最近の良くしたもの
+      - Rendezvous style の難しさは、同期の処理を書き直すことで良くなった
+      - `Ractor::Selector`APIを提供して、これを使うことでO(1)になった
+      - MaNyプロジェクトが完成すれば、ネイティブスレッド立ち上げすぎの問題も解決する
+        - 技術的な話題が沢山ある
+          - 現状：https://github.com/ko1/ruby/tree/many2
+          - ほとんどのruby/rubyのテストは通った状態
+        - MaNyプロジェクトによりRactorのコードが2倍早くなったが、ネイティブスレッド1個に縛ったときに素のRubyと同じ速さになるはずなのに遅くなっており(理論上は同等の速度)、改善できそう
+    - 今後の課題
+      - ractorごとのGCを並列に行いたい
+        - Ractor感で共有しているオブジェクトが少しだけあり、それが問題
+        - 解決を、GSoC2022で進行中

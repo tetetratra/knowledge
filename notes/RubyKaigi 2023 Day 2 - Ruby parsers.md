@@ -1,0 +1,61 @@
+---
+tags: "RubyKaigi, Ruby, RubyKaigiA), Matz Keynote Yukihiro \"\"Matz\"\" Matsumoto, The future vision of Ruby Parser Yuichiro Kaneko, PEG, RubyKaigiB, Understanding the Ruby Global VM Lock by observing it, RubyKaigiA, \"Ractor\" reconsidered, MaNy, Plug & Play Garbage Collection with MMTk, Lazy Sweep, 世代別GC, ライトバリア, Incremental Marking, VWA, Immix, Scala, GHC, Rubinius, Inko, LXR, MMTk, Lightning Talks, RubyKaigiC, Implementing \"\"++\"\" operator, stepping into parse.y, Yet Another Ruby Parser, Splitting: the Crucial Optimization for Ruby Blocks Benoit Daloze, Reading and improving Pattern Matching in Ruby, Fitting Rust YJIT into CRuby Alan Wu, Tips and Tricks for working in the MRI Codebase, Optimizing YJIT’s Performance, from Inception to Production Maxime Chevalier-Boisvert, Ruby JIT Hacking Guide"
+---
+
+# RubyKaigi 2023 Day 2: Rubyパーサー
+
+- **Day2**
+- [since:2023-05-12_10:20:00_JST until:2023-05-12_10:50:00_JST  - Twitter検索 / Twitter](https://twitter.com/search?q=since%3A2023-05-12_10%3A20%3A00_JST%20until%3A2023-05-12_10%3A50%3A00_JST%20%23RubyKaigiC&src=typed_query&f=live)
+  - (C) JA Implementing ""++"" operator, stepping into parse.y Misaki Shioi @coe401_
+    - スライド：https://speakerdeck.com/coe401_/implementing-plus-plus-operator-stepping-into-parse-dot-y
+    - https://github.com/shioimm/ruby-plusplus
+    - parse.yの説明
+    - `++`を`#succ`にしたい
+    - やること
+      - `++`の記号定義(scanner)
+        - `iINCOP`
+        - parser_yylexにcaseを追加
+      - 構文規則の追加(parser)
+        - `++`をメソッド呼び出しにする
+        - 還元時のアクションで、メソッド呼び出しを表すRNodeを作る
+          - `$$ = new_qcall(...)`
+    - ↑破壊的にレシーバーを書き換えたい
+    - `#__plusplus__`メソッドを使う方式
+      - メタプロで変数をgetして再代入
+    - ↑レシーバが数値リテラルの場合に動かない
+    - やること
+      - Matz: inc/decにオブジェクト指向のセマンティクスを追加できない
+    - `++`を`+=1`のsyntax suggerにする方式
+      - scanner
+        - `+`と`++`
+          - `+`を見たときに次の1文字を見る(`peekc`)
+            - それが`+`なら一旦次へ
+    - ↑`++`の優先順位がいまいち
+    - parserで頑張る方式
+      - scannerはほぼ同じ(字句解析はそのまま)
+      - `i++`の構文規則を追加(構文規則の方を変える)
+        - `new_op_assign()`を使う
+          - `+=`や`-=`などを表すノードを作る
+    - ↑単項演算子`+`の連続の文法が壊れた... これはruby++
+- [RubyKaigi 2023に参加しました & 登壇しました - shioimm || coe401_](https://coe401.hatenablog.com/entry/2023/05/21/212347)
+- [since:2023-05-12_11:00:00_JST until:2023-05-12_11:30:00_JST  - Twitter検索 / Twitter](https://twitter.com/search?q=since%3A2023-05-12_11%3A00%3A00_JST%20until%3A2023-05-12_11%3A30%3A00_JST%20%23RubyKaigiA&src=typed_query&f=live)
+  - (A) EN Yet Another Ruby Parser Kevin Newton @kddnewton
+    - https://github.com/Shopify/yarp
+    - error tolerance (エラーの許容範囲)
+      - IDEのため
+      - 自動でトークンを追加
+      - 自動でノードを追加
+      - `a + (`まで書いたときに何が足りていないのかを知りたい
+      - コンテキストに応じた回復
+        - `missing token`を追加？
+        - どの`end`が足りないかとかを補完してくれる？
+    - portability
+      - いろいろな実装やツールのため
+      - CRuby固有のもの(`VALUE, ID`など)に依存してはいけない
+      - 他のパッケージに依存してもいけない
+      - 文字列のエスケープなどは外から使えるAPIとして切り出さないといけない
+      - 各々の実装が文法に関するコードをアップグレードしなくて良くなる?
+    - maintaainability
+    - challenges
+    - adoption
+    - future work

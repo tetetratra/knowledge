@@ -1,0 +1,164 @@
+---
+tags: "RubyKaigi, Ruby, RubyKaigiA), Matz Keynote Yukihiro \"\"Matz\"\" Matsumoto, The future vision of Ruby Parser Yuichiro Kaneko, PEG, RubyKaigiB, Understanding the Ruby Global VM Lock by observing it, RubyKaigiA, \"Ractor\" reconsidered, MaNy, Plug & Play Garbage Collection with MMTk, Lazy Sweep, 世代別GC, ライトバリア, Incremental Marking, VWA, Immix, Scala, GHC, Rubinius, Inko, LXR, MMTk, Lightning Talks, RubyKaigiC, Implementing \"\"++\"\" operator, stepping into parse.y, Yet Another Ruby Parser, Splitting: the Crucial Optimization for Ruby Blocks Benoit Daloze, Reading and improving Pattern Matching in Ruby, Fitting Rust YJIT into CRuby Alan Wu, Tips and Tricks for working in the MRI Codebase, Optimizing YJIT’s Performance, from Inception to Production Maxime Chevalier-Boisvert, Ruby JIT Hacking Guide"
+---
+
+# RubyKaigi 2023 Day 1: Rubyの歴史とパーサー
+
+- in 松本
+- 5/11(木), 12, 13
+- https://rubykaigi.org/2023/schedule/
+- ruby-jp/RubyKaigi 2023
+- 事前イベント情報
+  - [Ruby-dev office hour RubyKaigi 2023 直前スペシャル - connpass](https://rhc.connpass.com/event/279952/)
+    - 5/1
+- 当日イベント情報
+  - [KeebKaigi 2023 Sponsorship Prospectus - Google ドキュメント](https://docs.google.com/document/d/1KYFmcw5EUdQWHeMGH6pxVp1vWrGEe36ySkLVh7y4Ovw/edit#heading=h.ige8lu3qf2h1)
+  - [“RubyMusicMixin 2023”, a RubyKaigi after event, and Call for DJs and VJs! - pixiv inside](https://inside.pixiv.blog/2023/03/13/180000)
+  - [Agileware Drinkup at RubyKaigi 2023 - connpass](https://agileware.connpass.com/event/279278/?utm_campaign=recent_events&utm_source=feed&utm_medium=atom)
+    - 05/12(金) 18:00 〜 20:00
+  - [MNTSQ Beer Hush!!! at RubyKaigi 2023｜IT勉強会・イベントならTECH PLAY［テックプレイ］](https://techplay.jp/event/899924)
+    - 05/12(金) 18:00〜20:00
+- 事後イベント情報
+  - [After RubyKaigi 2023〜メドピア、ZOZO、Findy〜 - connpass](https://zozotech-inc.connpass.com/event/281473/)
+    - メドピアが会場
+- 予習情報
+  - [RubyKaigi 2023 を最大限に楽しむために予習、ふりかえり、深堀り、三つのイベントを開催します！ - STORES Product Blog](https://product.st.inc/entry/2023/03/29/173529)
+  - [RubyKaigi 2023予習](https://jungle-traffic-1ba.notion.site/RubyKaigi-2023-9dc26316fbf040eeb7d73acdbc18c893)
+    - >この記事はわいたなかが、RubyKaigi 2023の予習のために調べた内容をまとめたものです。誤った内容や古い内容が多く含まれる可能性があることをご留意ください。誤りなどについてご指摘を頂ける場合は、TwitterのDMかリプライでお願いします。
+- その他
+  - [自腹で作る松本グルメマップ  2023 - SmartHR Tech Blog](https://tech.smarthr.jp/entry/2023/04/20/180925)
+  - [After RubyKaigi 2022〜メドピア、ZOZO、Findyの参加者がLTします〜 - connpass](https://findy.connpass.com/event/260097/)
+    - youtubeに残っているから見よう
+  - [RubyKaigi 2023で「Rubyメソッドかるた」を配布します! - ESM アジャイル事業部 開発者ブログ](https://blog.agile.esm.co.jp/entry/ruby-method-karuta)
+- スポンサー情報
+  - [メドピアはRubyKaigi 2023にPlatinum Sponsorとして協賛します！ - メドピア開発者ブログ](https://tech.medpeer.co.jp/entry/2023/03/08/100000)
+  - [【速報】マネーフォワードはRubyKaigi 2023 にPlatinum Sponsor で協賛します！ - Money Forward Developers Blog](https://moneyforward-dev.jp/entry/2023/03/01/104214)
+  - [【申込開始】SmartHRは RubyKaigi 2023 に「Matsumoto Box Sponsor」として協賛します！ - SmartHR Tech Blog](https://tech.smarthr.jp/entry/matsumoto-box)
+  - [RubyKaigi 2023 に ANDPAD メンバーが参加&登壇します! - ANDPAD Tech Blog](https://tech.andpad.co.jp/entry/2023/04/21/100000)
+- **Day1**
+- [since:2023-05-10_10:30:00_JST until:2023-05-11_11:30:00_JST ( OR  - Twitter検索 / Twitter](https://twitter.com/search?q=since%3A2023-05-10_10%3A30%3A00_JST%20until%3A2023-05-11_11%3A30%3A00_JST%20(%23RubyKaigi%20OR%20%23RubyKaigiA)%20&src=typed_query&f=live)
+  - (A) JA Matz Keynote Yukihiro ""Matz"" Matsumoto @yukihiro_matz
+    - Rubyの歴史と教訓
+    - 1994/2/24 Rubyという名前が決まった日
+      - Coral, Tish などの名前の候補があった
+      - 言語の基本的な方針はこの時点で決まっていた
+        - 最初の方針が大事
+    - 1994~95
+      - インターネット公開前
+      - Alpha release
+      - 他の人の意見でdo-endの文法が入った
+        - 他の人の視点大事
+      - バグ報告などのコミュニケーションからコミュニティーになっていった
+    - 97~
+      - Ruby1.0
+      - 利益(99%)vs楽しみ(1%)
+        - 楽しみ目的の人を同志という感じで開発に協力してもらう
+    - 1999~
+      - 本
+        - 99 オブジェクト指向スクリプト言語 Ruby
+          - まつもと ゆきひろ (著)
+        - 00 ピッケル本 (プログラミングRuby)
+          - 世界に広まるきっかけ
+          - 達人プログラマーを書いた人
+      - カンファレンス
+        - JAOO(2001-09)
+          - DHH(学生)がカンファレンスの手伝いをしていた(まだRailsを作っていない頃)
+        - RubyConf(2001-10)
+          - 37人くらい。フロリダ
+            - RubyKaigi2023は1300人
+      - → 人とのつながりが大事
+    - 2004 Rails
+      - Joy can create Benefit
+      - Marketing is Important
+        - 必ずしも「良いものと作れば自然に広まる」というわけではないことを知った
+        - DHHはマーケティング(プレゼンテーションなど)がうまい
+          - 15分blog動画を当時出たばかりのyoutubeで公開
+    - 2009~
+      - Ruby1.9.1
+      - YARV やるぶ
+      - 互換性を壊すとコミュニティーが荒れることを痛感
+      - ↑を打ち消すくらいのパフォーマンス向上
+    - 2013 20周年目
+      - Ruby2.0
+      - Railsの陰り
+      - 「Rubyは死んだ」になってくる
+    - 3x3
+      - MJIT, YJIT が出てきた
+      - リーダーシップとビジョンの提示は大事
+        - キーノートなどで「Ruby 3x3」というビジョンを提示
+    - その他
+      - 他の実装があることは嬉しい
+        - JRuby, IronRuby, TruffleRuby, mruby
+      - RubyのISO規格(2012)
+      - paul graham 100年の言語
+        - Rubyは30年の言語
+        - もう30年生きたい
+- [since:2023-05-11_13:30:00_JST until:2023-05-11_14:00:00_JST ( OR  - Twitter検索 / Twitter](https://twitter.com/search?q=since%3A2023-05-11_13%3A30%3A00_JST%20until%3A2023-05-11_14%3A00%3A00_JST%20(%23RubyKaigi%20OR%20%23RubyKaigiA)%20&src=typed_query&f=live)
+  - (A) JA The future vision of Ruby Parser Yuichiro Kaneko @spikeolaf
+    - スライド：[The future vision of Ruby Parser - Speaker Deck](https://speakerdeck.com/yui_knk/the-future-vision-of-ruby-parser)
+    - LR parser
+      - 1965 Knuthが発明
+      - 1875 Yacc
+      - 1985 Bison
+      - 今は手書きパーサーが主流
+        - Goとかは2015年にbisonから手書きパーサーに移行した
+      - 今のRubyはGNU Bisonを使ってLALRパーサを生成している
+    - 問題(ドラゴン(ドラゴンブック))
+    - 課題1：usability
+      - LSPが出てきて、リッチなエラーを出したい要望
+      - 構文エラーの場合もできるだけAST化したい
+      - Python
+        - PEGを使っている
+        - 捕まえたいエラーケースを全部列挙して対応している
+      - Rust, Go
+        - 手書きパーサー
+        - エラーケースの列挙が必要
+      - Bison(Rubyが使っている)
+        - エラーが起きた周辺を一旦消すことでどんなエラーなのを見つけている
+          - 入力の一部を失ってしまう欠点あり
+      - 採用したアプローチ
+        - トークンを追加・挿入することで、エラーリカバリーをする
+          - [Don't Panic! Better, Fewer, Syntax Errors for LR Parsers](https://arxiv.org/pdf/1804.07133.pdf) という論文の手法
+        - (LA)LRパーサーでは、構文定義を[DFA](決定性有限オートマトン)に変換している
+        - (LA)LRパーサーは、[PDA](プッシュダウンオートマトン)として実装されている
+        - validな構文になるようなトークンを探索する方法さえ実装すれば、この手法が使える
+      - 一旦まとめ
+        - エラーから回復する方法がある
+          - 一番カンタンに直せる方法を見つける
+          - path finding logicだけを実装すれば良い
+            - Rubyの文法がどうこうとかはきにしなくていい
+          - bisonでこれを入れるのは大変
+    - 課題2：maintaninability
+      - bison
+        - 実装をbisonのバージョンに追従するは大変
+        - [yui-knk/lrama](https://github.com/yui-knk/lrama) をつくった
+          - parse.y を読み込ませると Cで書かれたLALRパーサーを出してくれる
+      - LRパーサーはオートマトンなので、CSの知見を十分に活かせる
+      - parse.yが難しい理由
+        - 1.5万行
+        - LALRはコンフリクトが起きたときが難しい？
+        - パーサーとレキサーが混ざっているのが鬼門
+      - do-endのdoトークンには4種類がある(レキサーで判断)
+        - [Matzにっき(2004-04-26)](https://matz.rubyist.net/20040426.html)
+          - >OSS yaccの弱点(その2)
+            - > Rubyの文法には「ifなどの条件式には任意の式が書けるけどdoが来てはいけない」とか、 「メソッド引数には任意の式が書けるけどコンマを含んではいけない」のようなルールが存在する。 これに対応するためには、
+              - >すべてのルールを展開して、doが出現しうるものとdoが出現しないものの両方を用意する(コンマについても同様)。
+              - >lexerに手を回して予約語doに対して違うトークンを返すようにする。
+            - 2番目の手法を使っている
+      - Nonterminal attributes という技術
+        - 論文 [Practical LR Parser Generation](https://arxiv.org/abs/2209.08383)
+        - コンテキスト?を運ぶ?ための技術
+        - 非終端記号について属性を設定する
+        - しかし、エンドレスdefの文法でコンフリクトを引き起こしてしまった
+      - 考えてみると、これはdoの優先順位に関する問題
+        - 優先度を定義する機能はbisonが既に提供している→コンフリクトしなくなった
+      - まとめ：Nonterminal attributesだけでは解決できなかったdoの問題も既存の技術で解決できた
+    - 課題3：universal parserf
+      - RubyのパーサーはRubyの機能をたくさん使って作られているという問題がある
+      - → 209個の関数に切り出した
+      - 引き続きインターフェースを整理していきたい
+    - まとめ
+      - Rubyの3つの問題はLRパーサーの延長で解けた
+      - リャマというパーサー基盤を用意したので、今後はこれを使おう
+      - ドラゴンブックの剣士が持っている剣にはLALR Parser Generationという文字が書かれているぞ！
+- 詳しくは [Ruby Parser開発日誌 (1) - かねこにっき](https://yui-knk.hatenablog.com/entry/2022/12/11/154502) を読むのが良さそう

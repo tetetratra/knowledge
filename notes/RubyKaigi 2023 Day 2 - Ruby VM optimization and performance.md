@@ -1,0 +1,100 @@
+---
+tags: "RubyKaigi, Ruby, RubyKaigiA), Matz Keynote Yukihiro \"\"Matz\"\" Matsumoto, The future vision of Ruby Parser Yuichiro Kaneko, PEG, RubyKaigiB, Understanding the Ruby Global VM Lock by observing it, RubyKaigiA, \"Ractor\" reconsidered, MaNy, Plug & Play Garbage Collection with MMTk, Lazy Sweep, 世代別GC, ライトバリア, Incremental Marking, VWA, Immix, Scala, GHC, Rubinius, Inko, LXR, MMTk, Lightning Talks, RubyKaigiC, Implementing \"\"++\"\" operator, stepping into parse.y, Yet Another Ruby Parser, Splitting: the Crucial Optimization for Ruby Blocks Benoit Daloze, Reading and improving Pattern Matching in Ruby, Fitting Rust YJIT into CRuby Alan Wu, Tips and Tricks for working in the MRI Codebase, Optimizing YJIT’s Performance, from Inception to Production Maxime Chevalier-Boisvert, Ruby JIT Hacking Guide"
+---
+
+# RubyKaigi 2023 Day 2: Ruby VMの最適化と性能
+
+- [since:2023-05-12_11:30:00_JST until:2023-05-12_14:00:00_JST  - Twitter検索 / Twitter](https://twitter.com/search?q=since%3A2023-05-12_11%3A30%3A00_JST%20until%3A2023-05-12_14%3A00%3A00_JST%20%23RubyKaigiB&src=typed_query&f=live)
+  - (B) EN Splitting: the Crucial Optimization for Ruby Blocks Benoit Daloze @eregontp
+    - スライド：https://eregon.me/blog/assets/research/splitting-the-crucial-optimization-for-ruby-blocks-rubykaigi.pdf
+    - >この最適化は分割と呼ばれ、メソッドのさまざまなコピーを使用し、それらをさまざまな呼び出しサイトで指定されたブロックに特化します。これにより、メソッドとブロックを一緒にコンパイルして最高のパフォーマンスを得ることができます。
+    - cache
+      - loopup cache
+        - どこのクラスのメソッドが呼ばれたか
+      - call target cache
+        - どこで呼ばれたか
+    - 渡されたブロックをインライン化する
+      - どんなブロックが渡されたかによってメソッドの中で分岐する
+    - TruffleRubyではもっと一般的なアプローチでやっている
+```text
+1.0.sum_to(10.0) ->                                     -> `Float >`
+1.sum_to(10)     -> sum_to->step `untile value > limit` -> `Integer >`
+```
+
+- 性能
+  - splittingをTruffleRUbyですると、CRubyの106倍(元々TruffleのはCRubyの15倍)
+  - OptCarrotも性能up
+- まとめ
+  - paper SELF VM (1989)
+  - completely removes polymorphism and megamorphism
+- TrufflleRubyやGraalVMの利点
+  - `Polyglot.eval('python', 'import matplotlib')`
+  - 複数の言語をまたげる
+    - LSPやバックトレース用
+  - GCを使い分けられる？
+- [since:2023-05-12_14:10:00_JST until:2023-05-12_14:40:00_JST  - Twitter検索 / Twitter](https://twitter.com/search?q=since%3A2023-05-12_14%3A10%3A00_JST%20until%3A2023-05-12_14%3A40%3A00_JST%20%23RubyKaigiC&src=typed_query&f=live)
+  - (C) EN Reading and improving Pattern Matching in Ruby Yuki Torii @yotii23
+    - arrayの場合はdeconstructとかをやめた
+    - 2倍になった
+    - deconstructのoverrideのcheck
+    - https://twitter.com/kokuyouwind/status/1656894460914188288?s=20
+      - >「ArrayパターンにおけるdeconstructメソッドとそれがArrayを返すかのチェックは、Arrayには必要ないはずなので、Arrayチェックを先に挟んでスキップすることで高速化できないか」 これどっちが速いんだろうなぁ。Array渡すケースが支配的ならこの方が速いのか
+- [since:2023-05-12_14:50:00_JST until:2023-05-12_15:20:00_JST  - Twitter検索 / Twitter](https://twitter.com/search?q=since%3A2023-05-12_14%3A50%3A00_JST%20until%3A2023-05-12_15%3A20%3A00_JST%20%23RubyKaigiA&src=typed_query&f=live)
+  - (A) EN Fitting Rust YJIT into CRuby Alan Wu @alanwusx
+    - 2020 μJIT
+    - 2021 YJIT
+    - 2022 TJITtoRust
+      - AArch64
+    - 自動生成したコードをRustの借用チェッカーで検査できるのがうれしい
+    - Rustの統合における難しさ
+      - Rubyにはバイナリはない (自前でビルドしないといけない)
+      - 一口にRubyを入れると行ってもたくさんの選択肢がある
+    - rubyのmake
+      - cargoは(Rubyのmakeの)インクリメンタルビルド? ができない?
+    - C言語の仕様(型のサイズ?)がなにか難しい
+    - Cの修飾子restrict, constなど)とRustの`&, &mut`
+      - >restrict は C99 標準によって導入されたキーワードであり、ポインター宣言で使用できます。この型修飾子を追加することにより、プログラマーは、ポインターの有効期間中、ポインターが指すオブジェクトへのアクセスに他のポインターが使用されないことをコンパイラーに示唆します。(日本語訳)
+        - https://en.wikipedia.org/wiki/Restrict
+      - RefCellはメモリを食うしクラッシュするかも
+      - 今はunsafeでなんとかしている
+    - link
+      - `ld`コマンド(コンパイルされたコードを統合するツール)
+- [since:2023-05-12_16:00:00_JST until:2023-05-12_16:30:00_JST  - Twitter検索 / Twitter](https://twitter.com/search?q=since%3A2023-05-12_16%3A00%3A00_JST%20until%3A2023-05-12_16%3A30%3A00_JST%20%23RubyKaigiA&src=typed_query&f=live)
+  - (A) EN Tips and Tricks for working in the MRI Codebase Jemma Issroff @jemmaissroff
+    - 3bugs
+    - ①`#sum`のバグ
+      - build locally
+        - デバッグフラグ色々
+      - test localy
+        - miniruby
+          - bootstraptest ディレクトリ
+          - `make btest`
+          - `BTEST=ファイル`
+        - ruby
+          - testディレクトリ
+          - `make test-all -j16`
+          - `TEST=ファイル`
+      - 関数の見つけ方
+        - `#sum`の例
+        - `rb_define_xxx`
+      - lldb
+        - `make lldb`
+    - ②system stack error
+      - lldbコマンド
+        - `bt` backtrace
+        - `f <number>` n番目のフレームへ行く
+        - `up, down`↑↓のフレームへ
+      - `misc/lldb_helpers`
+      - `rb_bug`関数を使おう
+    - ③ipaddr
+      - libディレクトリへの変更は、ruby/rubyとは別のディレクトリにある
+        - 別のディレクトリにある実装が、ruby/rubyにミラーされる
+      - 便利なURLがある
+        - `https://gem.wtf/irb`→`https://github.com/ruby/irb`
+- [since:2023-05-12_16:40:00_JST until:2023-05-12_17:40:00_JST  OR  - Twitter検索 / Twitter](https://twitter.com/search?q=since%3A2023-05-12_16%3A40%3A00_JST%20until%3A2023-05-12_17%3A40%3A00_JST%20%23RubyKaigiA%20OR%20%23RubyKaigi&src=typed_query&f=live)
+  - (A) EN Keynote Optimizing YJIT’s Performance, from Inception to Production Maxime Chevalier-Boisvert @maximecb
+    - 技術的な話ではない。YJITの紹介など
+    - JITはAOTに比べて、動作を観察できる利点がある
+    - マイクロJITの時代
+      - JITに入るときと出るときに時間ががかかっていた
+    - ベンチマークだけでもなんだか滅茶苦茶色々なことを考えないといけなくて大変そう
