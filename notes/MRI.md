@@ -119,7 +119,7 @@ gcc (Ubuntu/Linaro 7.5.0-3ubuntu1~18.04) 7.5.0
 - https://github.com/yui-knk/lr-parser-101
   - >Rubyで書かれたLALR(1) パーサジェネレーター Raccを使った電卓の実装を通じて、パーサジェネレーターを利用したパーサの作り方について学びます。
 - [Ruby に >>> 演算子を実装して遊ぶ](https://zenn.dev/sosukesuzuki/articles/7b50a49714c093)
-- [Rubyパーサーを一新するYARPプロジェクトの全容と将来（翻訳）｜TechRacho by BPS株式会社](https://techracho.bpsinc.jp/?p=131808)
+- [Rubyパーサーを一新するYARPプロジェクトの全容と将来（翻訳）｜TechRacho by BPS株式会社](https://techracho.bpsinc.jp/hachi8833/2023_07_10/131808)
 - 【Ruby】String#[]= について「すごい」と思ったので、予想を混ぜつつ調べた過程をまとめた - Qiita
   - https://qiita.com/yuki82511988/items/45a6adcb677f7bddc19f
 - [RubyVMの様子を観察したい - nownab.log](https://blog.nownabe.com/2016/11/16/526.html/)
