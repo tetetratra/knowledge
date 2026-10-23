@@ -1,0 +1,47 @@
+---
+tags: "TypeScript, 型, React, GraphQL, RedwoodJS, Jest, Storybook"
+---
+
+# TypeScript
+
+- `as const`
+  - >オブジェクトリテラルの末尾にas constを記述すればプロパティがreadonlyでリテラルタイプで指定した物と同等の扱いになります。
+  - https://typescriptbook.jp/reference/values-types-variables/const-assertion
+  - オブジェクトの内側も再代入不可になる
+- [TypeScript特有の組み込み型関数 || log.pocka.io](https://log.pocka.io/ja/posts/typescript-builtin-type-functions/)
+  - `type Partial<T>`
+    - >型 T のすべてのプロパティを省略可能(つまり| undefined)にした新しい型を返す Mapped Type です。
+  - `type Required<T>`
+    - > 型 T の全てのプロパティを必須にした新しい型を返します。
+  - `type Readonly<T>`
+    - > 型 T の全てのプロパティにreadonly属性をつけた新しい型を返します。
+  - `type Pick<T, K extends keyof T>`
+    - > 型 T の中から K に当てはまるプロパティのみを抜き取った新しい型を返します。 なお、K には型 T に存在するキーを指定する必要があります。
+  - `type Omit<T, K extends keyof any>`
+    - > 型 T の中から、キー名が K に当てはまるプロパティを除外した新しい型を返します。 なお、Pick とは異なり K には T のキー名以外を指定することができます。
+    - idの有無によってcreate/updateを分けるbulkなAPIを叩くときとかに使いそう？t
+  - `type Record<K extends keyof any, T>`
+    - > 型 T なプロパティ K を持つレコード型を作成します。
+    - あまり使い道なさそう
+  - `type Exclude<T, U>`
+    - >型 T が型 U に代入可能であればnever、そうでなければ型 T を返す Conditional Type です。 主に Union Types から特定の型を取り除く際に使われます。
+  - `type Extract<T, U>`
+    - > 型 T が型 U に代入可能であれば型 T、そうでなければneverを返す Conditional Type です。 Exclude の逆ですね。 主に Union Types から特定の型を抽出する際に使われます。
+  - NonNullable
+  - Parameters
+  - ConstructorParameters
+  - ReturnType
+  - InstanceType
+  - ThisType
+- tsconfigで使いたいtargetには使いたい機能がない、でも使いたい→libオプション
+  - [tsconfig.jsonを設定する | TypeScript入門『サバイバルTypeScript』](https://typescriptbook.jp/reference/tsconfig/tsconfig.json-settings)
+- インターセクション型
+  - [インターセクション型 (intersection type) | TypeScript入門『サバイバルTypeScript』](https://typescriptbook.jp/reference/values-types-variables/intersection)
+  - `T & S`
+  - >ユニオン型がどれかを意味するならインターセクション型はどれもです。言い換えるとオブジェクトの定義を合成させることを指します。
+  - reactのonChangeのeventのtargetは`EventTarget & HTMLInputElement`
+- [TypeScriptの型入門 - Qiita](https://qiita.com/uhyo/items/e2fdef2d3236b9bfe74a#readonly)
+- redwoodjs
+  - https://redwoodjs.com
+  - react, graphql, [prisma](ORM), typescript, Jest, storybook を使っているフレームワーク
+  - [RedwoodJS を Ruby on Rails と比較してみる](https://zenn.dev/mugi/articles/334f9556095a07)
