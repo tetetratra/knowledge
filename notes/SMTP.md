@@ -31,7 +31,7 @@ tags: "メール, プロトコル, SendGrid"
 > DATA
 354 Continue
 > To: toaddress@example.com
-> From: fromaddress@kke.co.jp
+> From: fromaddress@example.com
 > Subject: test mail
 >                              # 空行
 > This is body of the message. # メール本文
