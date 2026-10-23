@@ -1,0 +1,69 @@
+---
+tags: "Ruby, caller"
+---
+
+# Rubyのメタプログラミング
+
+- **参考になりそうな記事とか**
+  - [【Ruby Advent Calendar 2019】ピュア Ruby で Ruby 2.7 の Numbered parameter を実装してみよう！【1日目】 - Secret Garden(Instrumental)](http://secret-garden.hatenablog.com/entry/2019/12/01/154607)
+  - [Rubyのメタクラス階層 - 世界線航跡蔵](https://blog.yugui.jp/entry/768)
+  - [Ruby: includeしたモジュールに「後から」別のモジュールを動的にincludeしても反映されない｜TechRacho（テックラッチョ）〜エンジニアの「？」を「！」に〜｜BPS株式会社](https://techracho.bpsinc.jp/?p=66108)
+  - https://qiita.com/siman/items/b6895d0826d5e83fd9cb
+  - https://qiita.com/siman/items/9426ff6c113247088f7e#トレース出来るイベントの種類
+  - [ブロックなしRubyをやろうとすると関数型プログラ…うーんリストプロセッ、えーと感じ感じ - Qiita](https://qiita.com/supermomonga/items/f22dbe021a8e79d55322)
+- **構文・文法**
+  - `Klass = Class.new do ~ end` の書き方とかでクラスやメソッドを作れば、スコープの区切り(スコープゲート)作らないから外側のローカル変数にアクセスできる
+    - [Ruby:ブロックを用いて、スコープを思い通りに飛び越える。 Qiita](https://qiita.com/takahiro1127/items/03479cd1025de28aea4d)
+- **kernel**
+  - `caller(start = 1)`
+    - 引数段階上の呼び出し元の情報を取り出す
+    - [Kernel. (Ruby 2.7.0 リファレンスマニュアル)](https://docs.ruby-lang.org/ja/latest/method/Kernel/m/caller.html)
+    - [Ruby でのバックトレース活用法](https://magazine.rubyist.net/articles/0031/0031-BackTrace.html)
+  - **BasicObject**
+    - `#__send__(name, *args)`
+      - メソッド呼び出しする
+    - `#instance_eval { |obj| }`
+      - 自身のコンテキストでブロックを評価
+      - インスタンス変数`@`にアクセスできる
+      - ローカル変数は外側と共有する
+    - `#instance_exec {}`
+    - `#method_missing(name, *args)`
+    - `#singleton_method_added`
+    - `#singleton_method_removed`
+    - `#singleton_method_undefined`
+  - **Object**
+    - `#send`
+    - `#class`
+    - `#define_singleton_method(symbol) { ... }`
+      - 特異メソッド(クラスメソッド)を定義
+      - さっき書いたように、スコープゲートを作らない
+    - `#extend(*modules)`
+      - モジュールのインスタンスメソッドを、selfの特異メソッドとして追加
+      - `#include`では、selfのインスタンスメソッドとして追加される
+    - instance_variable_defined?(var)
+    - instance_variable_get(var)
+    - instance_variable_set(var)
+    - instance_variables
+    - method(name)
+      - Methodオブジェクトを返す
+        - メソッドの実体とレシーバとの組
+        - procと違ってコンテキストを保存しない
+    - methods(bool = true)
+      - 呼べるメソッドの一覧
+      - falseだと、継承した特異メソッドを除く
+    - private_methods(bool = true)
+    - protected_methods(bool = true)
+    - public_method(name)
+    - public_methods
+    - public_send(name, *args)
+    - remove_instance_variable(name)
+    - respond_to?(name)
+      - メソッドを持つときtrue
+      - 第2引数をtrueで、protectedやprivateを含める
+    - singleton_class
+      - 特異クラスを返す。無ければ作って返す
+    - singleton_method(name)
+      - 特異メソッドをMethodオブジェクトにして返す
+      - 普通の方法で定義するようなインスタンスメソッドのシンボルを引数に入れて普通のnewしたインスタンスにこのメソッドを呼んでも、インスタンスメソッドは特異メソッドではないからErrorになる
+      - 見えないクラス階層の概念を知らないと理解むずい
+    - singleton_methods
