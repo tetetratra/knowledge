@@ -1,0 +1,106 @@
+---
+tags: "AWS, Aurora, DB, データベース"
+---
+
+# AWS Aurora
+
+- [Amazon Auroraでクローンを使用して検証環境を作ってみた  - Qiita](https://qiita.com/tani_yu/items/d555d05aeebf1428260e)
+  - クローンは、auroraインスタンスではなくauroraクラスタを対象に行うものらしく、新しいクラスタが作られる
+  - CoW(コピーオンライト)で作られるので爆速
+- [Auroraクローン機能を使ってコピーDBを作成する方法 - 弥生開発者ブログ](https://tech-blog.yayoi-kk.co.jp/entry/2024/12/14/000000)
+  - もともとはスナップショットから復元して作っていたが、クローン方式に移行した
+- **aurora化の事例**
+  - https://tech.medpeer.co.jp/entry/2023/08/21/095251
+    - 構成
+      - MySQL → Aurora MySQL
+      - rails
+    - データ移行
+      - Auroraをリードレプリカとして起動
+    - 切り替え
+      - 接続先についてDNSを噛ますことで一瞬で切り替えられるようにしている
+        - デプロイでアプリケーションの参照先を切り替えるのは時間がかかる
+    - 注意点
+      - Auroraのフェイルオーバー時の接続切り替えの検証
+- >AuroraとRailsを組み合わせて使用すると、Railsのコネクションプールの仕組み上、フェールオーバー時に新しいライターへのコネクション切り替えが自動的に行われず、リーダー(旧 ライター)にデータの書き込みを行ってしまう事象が知られています。これにより、予期せぬタイミングでデータ更新ができない状況が発生します
+- >書き込みエラーが発生した際に接続をリセットし、再接続を行うミドルウェアを開発しました
+  - https://developer.medley.jp/entry/2021/11/08/180120/
+    - 構成
+      - RDS（Amazon RDS for MySQL）→ Aurora（Amazon Aurora）
+      - Rails
+    - 検証したこと
+      - レスポンスタイム
+        - 実際に負荷をかけてチェック
+        - explain句でチェック
+      - Aurora のフェイルオーバーと Rails への影響
+        - >本サービスにおいて MySQL のクライアントとして使用しているmysql2では、コネクションがアクティブであることをmysql_pingが判定してくれるようです。しかし残念なことに Aurora 側でのフェイルオーバーの発生までは検知することができないようです。
+        - 対応案
+          - 1. Aurora 用のクライアント Gem を使用する
+            - >トランザクション中にフェイルオーバーが発生した際の挙動が本サービスには適合しないことが分かりました
+          - 2. Mysql2::Error が発生した場合、サーバーエラーにしつつコネクションを切断して再接続を促す
+            - >上記メドピアの事例ではコレを採用している
+          - 3. 一定回数リクエストを処理するごとに再接続させる
+            - >→ こちらを採用再接続の度に発生するオーバーヘッドによる速度影響についても低負荷・高負荷の状態で検証を行いましたが、数値的には軽微であり、少々の遅延は許容することになりました。
+  - https://qiita.com/asflash8/items/090a92f6390e0de9f649
+    - RDS MySQL → Aurora MySQL
+    - 移行案 → 1を採用
+      - 1. 内部DNSを利用してDBの接続先を抽象化し、DNSの向き先をAuroraへ変更する
+- DNSのTTLを短く（5秒とか）指定することで高速に切り替えが可能
+- DNSの浸透までの時間が本当に指定時間で済むのか不明
+  - 発生した問題
+    - (ttlは5秒にしていたが) 切り替えに5分かかった
+      - >アプリケーション側でコネクションプーリングをしていると期待しているタイミングで切り替えが行われないかもしれません
+    - フェイルオーバー時に書き込みが失敗する問題
+      - >接続エラーが発生した場合は再接続してくれる mysql-aurora gemを導入しました
+      - 検証方法：コンソール上で手動フェイルオーバーを実行
+  - 2. 環境変数で定義しているDBのホスト情報をデプロイして変更する
+  - https://techblog.zozo.com/entry/dual-database-migration-strategy
+    - 構成
+      - SQL Server (オンプレ) → Aurora MySQL
+      - Spring Boot
+    - (色々前提や構成違って参考にならなそうなのでスキップ)
+  - https://developer.feedforce.jp/entry/2019/04/03/140000
+    - 構成
+      - RDS for MySQL5.6 → Aurora
+    - DMS による移行について解説している
+      - DMSでは3種類の種類のデータ移行方法がある
+        - 1. 既存のデータ移行する
+        - 2. 既存のデータを移行して、継続的な変更をレプリケートする
+        - 3. データ変更のみをレプリケートする
+      - データの他に「ユーザ アカウント移行」「スキーマ移行」が要る
+    - データベース移行に失敗した場合の備え
+      - 数日後に障害が判明した場合
+        - Aurora移行用とは別にロールバック用のDMSタスクを準備
+  - https://matsukaz.hatenablog.com/entry/2017/07/31/125406
+    - Rails 4.2
+    - (auroraの) Writer／Readerの昇格／降格が発生しても、インスタンスのIPアドレスは変わらない
+      - > WriterにつながるCluster Endpointと、Reader用のReader EndpointのDNSレコードのCNAMEが変わるだけ
+    - 解決方法
+      - コネクションプールを使わない
+        - https://github.com/sonots/activerecord-refresh_connection
+      - 接続できなくなった場合だけコネクションプールを破棄
+        - Railsの標準の ConnectionManagement を差し替え
+  - https://qiita.com/kenjiszk/items/f77eef33c9f613c4ae49
+    - >Auroraの用に、マスターがスレーブに降格する様な場合には、引き続きrailsは旧マスターに接続し続けられる為に、コネクションをプーリングし続けてしまい書き込みだけが出来ない様な状態になる。
+    - >解決策としては、コネクションプーリングをやめて都度接続にする事が手っ取り早い。以下の様なgemもあるためかなり簡単に設定出来る。
+    - >各インスタンスのIPに変化は無く、CNAMEの切り換えだけが行われている事が分かる。
+  - https://dev.classmethod.jp/articles/rails_aurora_failover/
+    - Pumaのケース
+    - コネクションプーリングの無効化は、Unicornだからできることであって、Pumaでは不可能
+      - Unicornはマルチプロセスだからコネクションを切断しても他のリクエストには影響が及ばないが、Pumaはマルチスレッドなので(= コネクションをスレッド間で共有しているので)切断するわけにはいかない
+    - `ActiveRecord::ConnectionAdapters::Mysql2Adapter` の `active?` メソッドをオーバーライドして対処
+      - >プールから取り出されたコネクションは、最初に active? メソッドで評価されるので、この時にチェックを追加してやるだけ
+  - https://recruit.group.gmo/engineer/jisedai/blog/aws-aurora-mysql-rebuild-table/
+    - aurora 3.02.2 以前の話 (現在は修正済み)
+    - `Table テーブル名 doesn’t exist` が帰って来る
+      - >OPTIMIZE TABLE以外にも，ALTER TABLEでテーブル再構築を伴う処理（カラムの削除など）を実行した場合も同様の挙動になります
+  - https://developers.freee.co.jp/entry/aurora-3042-ddl-problem
+    - `Table 'db_name.tbl_name' doesn't exist`事象の再現した DDL について、いずれも `ALGORITHM = INPLACE` かつテーブルの再構築が必要な online DDL という共通点が見られました。
+    - 上記記事と似た事象っぽい
+    - https://ca-srg.dev/c786e05ad11045308e1978ac863c8db3
+      - >【追記】2024年3月15日にAurora MySQL Version 3.04.2がリリース
+      - >上記のオンラインDDLの挙動は3.04.2のリリースによって修正されました。
+  - MariaDBとMySQL間の差異
+    - https://mariadb.com/docs/release-notes/community-server/about/compatibility-and-differences/mariadb-vs-mysql-compatibility
+  - https://techblog.zozo.com/entry/refactoring_iqon_db
+  - https://dev.mysql.com/doc/refman/8.0/ja/numeric-type-syntax.html
+    - >MySQL 8.0.17 では、整数データ型の表示幅属性は非推奨になりました。将来のバージョンの MySQL ではサポートされなくなる予定です。
