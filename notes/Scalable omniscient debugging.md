@@ -1,0 +1,44 @@
+---
+tags: "全知デバッグ, Debugging Backwards in Time, TOD, Igor: a system for program debugging via reversible execution, Efficient algorithms for bidirectional debugging, a user-space library for record-replay debugging"
+---
+
+# Scalable omniscient debugging
+
+- [Scalable omniscient debugging | ACM SIGPLAN Notices](https://dl.acm.org/doi/abs/10.1145/1297105.1297067)
+- Debugging Backwards in Timeを引用している
+- 実行トレースの大きさをを抑える手法(を実装したツール)を提案
+  - >効率的なインスツルメンテーション
+  - >スケーラブルなストレージと効率的なクエリのための特別な分散データベース
+  - >トレース量を関連イベントに減らすための部分トレースのサポート
+- TOD
+  - Trace-Oriented Debugger
+  - を作った
+- 関連研究
+  - 全知でバッグ関連
+    - ZStep95
+      - Lisp用
+    - ODB
+      - java
+      - 「Debugging Backwards in Time」の人
+    - Unstuck
+      - Smalltalk
+    - CodeGuide
+      - java
+      - 商用
+  - クエリベースデバッグ
+    - >クエリベースのデバッグは、高レベル言語で表現されたクエリにマッチするイベントを特定することである
+    - 全知デバッグは、クエリに対して答えを返す、という手法には機能不十分
+- Replay-based debugging
+  - 定期的に状態を保存(チェックポイント)することで、遡るのに必要な時間を短縮している
+    - Igor: a system for program debugging via reversible execution
+      - Stuart I. Feldman and Channing B. Brown.
+      - In PADD ’88: Proceedings of the 1988 ACM SIGPLAN and SIGOPS workshop on Parallel and distributed debugging, pages 112– 123, New York, NY, USA, 1988. ACM Press.
+    - Efficient algorithms for bidirectional debugging
+      - Bob Boothe.
+      - In PLDI ’00: Proceedings of the ACM SIGPLAN 2000 conference on Programming language design and implemen- tation, pages 299–310, New York, NY, USA, 2000. ACM Press.
+    - a user-space library for record-replay debugging
+      - Yasushi Saito. Jockey
+      - In Proceedings of the sixth international sympo- sium on Automated analysis-driven debugging (AADEBUG 2005), pages 69–76, New York, NY, USA, 2005. ACM Press.
+    - 環境のスナップショットを取っているのか？
+  - >実行点を後方に移動させた場合、それを再び前方に移動させることは、プログラムの再実行を意味し、これは長時間稼働するプログラムでは実用的でない。TODでは、プログラムの全履歴が利用可能であり、自由に移動することができる。
+- このデバッガで、タイムトラベル途中に副作用を発生させることはできるのか？
