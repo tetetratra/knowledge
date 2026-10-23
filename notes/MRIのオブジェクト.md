@@ -8,8 +8,10 @@ tags: "Ruby, MRI"
 - MRI
   - 参考
     - Rubyのウラガワ
-    - Ruby インタプリタで学ぶアルゴリズムとデータ構造
+    - [Ruby インタプリタで学ぶアルゴリズムとデータ構造](https://koichi-sasada.hatenablog.com/)
     - A Rubyist's Walk Along the C-side
+      - [A Rubyist's Walk Along the C-side (Part 1): Hello World! - Peter Zhu](https://blog.peterzhu.ca/ruby-c-ext-part-1/) など
+      - コミッターの人のブログ
   - `RVALUE`は、`VALUE`5個分
     - ヘッダ(`RBasic`構造体)で2個分、ボディーで3個
   - `VALUE`は64ビットCPUで8バイト
