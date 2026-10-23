@@ -16,7 +16,7 @@ tags: "ACM, PLDI, メタプログラミング, 自己最適化インタプリタ
 - **Background**
   - メタオブジェクトプロトコル
     - MOP
-    - The Art of the Metaobject Protocol. The MIT Press, 1991. が提案した?
+    - G. Kiczales, J. des Rivie`res, and D. G. Bobrow. The Art of the Metaobject Protocol. The MIT Press, 1991. が提案した?
     - 言語のセマンティクスを変更できる
     - 委譲とかもそう
   - pythonに関するメタプロのオーバーヘッド説明がよくわからぬ
