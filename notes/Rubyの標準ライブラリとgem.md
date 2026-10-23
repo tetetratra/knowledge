@@ -7,7 +7,7 @@ tags: "Ruby, 標準添付ライブラリ, gem"
 default gem と bundled gem
  https://secret-garden.hatenablog.com/entry/2021/07/08/204602
  [How to develop the Standard Libraries of Ruby? by Hiroshi SHIBATA - RubyKaigi Takeout 2021 https://rubykaigi.org/2021-takeout/presentations/hsbt.html]
-  3.0 [https://gyazo.com/ae72428e6679dc0ec311e24b06a5b269]
+  3.0 ![標準ライブラリの分類](../assets/efcb34c0618b30e362c089b6393b8e7b071436c1b57b85cdf1b8898369fe6b37.png)
 - standard libraries
   - 標準添付ライブラリ
   - 変更不可
