@@ -1,0 +1,47 @@
+---
+tags: "本, GHC, 型クラス, パターンマッチ, 値コンストラクタ, 多相型, 具体型, Functor, 型コンストラクタ, ファンクター, Applicative, モノイド, モナド"
+---
+
+# すごいHaskell：モジュール
+
+- [すごいHaskellたのしく学ぼう！](https://shop.ohmsha.co.jp/shopdetail/000000001926/)
+- **第6章: モジュール**
+  - `Prelude`というモジュールが、デフォルトでインポートされている
+    - `map`, `even`, `==`とかは全部`Prelude`モジュールの関数
+  - `import モジュール名`
+  - [Introduction | Hackage](https://hackage.haskell.org/)
+    - >Hackage: The Haskell Package Repository
+  - [Hoogle](https://hoogle.haskell.org/)
+    - >関数名、モジュール名、はては型シグネチャからも検索できる、とても素晴らしいHaskell検索エンジンです。
+  - `import Data.List (nub, sort)`で一部をインポート
+  - `import Data.List hiding (nub)`で一部を除いたすべてをインポート
+  - `import qualified Data.Map`で完全修飾名じゃないと呼べなくする
+  - `import qualified Data.Map as M`で別名
+  - `Data.List`
+    - リストに対する関数群
+    - `words`
+    - `group`
+      - Rubyのchunk
+    - `sort`
+    - `tails [1,2,3,4,5] -- [[1,2,3,4,5],[2,3,4,5],[3,4,5],[4,5],[5],[]]`
+    - `foldl'`
+      - foldlの正格評価版
+        - 正格評価される関数をユーザー側で定義したいときはどうするんだろう
+      - スタックのオーバーフローを防ぐために使う
+    - `find :: Foldable list => (item -> Bool) -> list item -> Maybe item`
+    - `lookup :: Eq key => key -> [(key, value)] -> Maybe value`
+  - `Data.Char`
+    - `ord 'a' -- 97`
+    - `chr 97 -- 'a'`
+    - `digitToInt`
+    - `isDigit`
+  - `Data.Map`
+    - 連想配列(リスト)
+    - `fromList :: Ord k => [(k, a)] -> Map k a`
+    - `fromListWith`
+      - キーの重複を排除しない版
+    - `insert :: Ord k => k -> a -> Map k a -> Map k a`
+    - `size`
+  - モジュールを自作
+    - ファイル名は`モジュール名.hs`にする
+    - `module モジュール名 (公開したい関数, ...) where`
