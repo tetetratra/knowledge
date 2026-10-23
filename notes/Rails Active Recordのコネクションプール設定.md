@@ -4,7 +4,7 @@ tags: "Ruby on Rails, パフォーマンス, スケーリング, Puma, GVL, ア�
 
 # Rails Active Recordのコネクションプール設定
 
-- [Railsスケーリング（4）: Active Recordコネクションプールの適切な設定を理解する（翻訳）｜TechRacho by BPS株式会社](https://techracho.bpsinc.jp/?p=151486)
+- [Railsスケーリング（4）: Active Recordコネクションプールの適切な設定を理解する（翻訳）｜TechRacho by BPS株式会社](https://techracho.bpsinc.jp/hachi8833/2025_07_16/151486)
   - Active Recordにおけるコネクションプールの実装
     - スレッドでコネクションが必要になると、スレッドはプールからコネクションをチェックアウト（=借り出し）し、データベース操作を実行したら、コネクションをプールに返却する
     - Reaperという機能があり、定期的にプール内のコネクションをチェックして、デッドコネクションや、長時間チェックアウトされたままのアイドリングコネクションを削除している
