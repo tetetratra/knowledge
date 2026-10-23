@@ -7,7 +7,7 @@ tags: "Rails, Ruby_on_Rails, require, SPA, CSRF, Passkey, 認証"
 - `rails s -p 3001`でport指定立ち上げ
 - rails 以外でRuby拡張使うには`require 'active_support/core_ext'`
 - `secret_token`とは
-  - [Railsのsecret_key_baseを理解する（翻訳）｜TechRacho（テックラッチョ）〜エンジニアの「？」を「！」に〜｜BPS株式会社](https://techracho.bpsinc.jp/?p=46809)
+  - [Railsのsecret_key_baseを理解する（翻訳）｜TechRacho（テックラッチョ）〜エンジニアの「？」を「！」に〜｜BPS株式会社](https://techracho.bpsinc.jp/hachi8833/2017_10_24/46809)
   - cookie暗号化・署名時の鍵(暗号化の種みたいな)
   - `config/secrets.yml` に書くか、環境変数`SECRET_KEY_BASE`を設定するか。
   - 鍵生成には`bundle exec rake secret`が使われがち
@@ -92,11 +92,11 @@ tags: "Rails, Ruby_on_Rails, require, SPA, CSRF, Passkey, 認証"
   - [定数の自動読み込みと再読み込み (Zeitwerk) - Railsガイド](https://railsguides.jp/autoloading_and_reloading_constants.html)
     - 動き方の解説
     - 未定義のクラス（定数）があったとき、そのクラス名からパスを推測して、クラスの定義ファイルを見つける
-  - [週刊Railsウォッチ（20190128）Rails 6のオートローダーがZeitwerkに置き換わる？Rails 6はRuby 2.5が必須、最近のSQLiteほか｜TechRacho by BPS株式会社](https://techracho.bpsinc.jp/?p=68986)
+  - [週刊Railsウォッチ（20190128）Rails 6のオートローダーがZeitwerkに置き換わる？Rails 6はRuby 2.5が必須、最近のSQLiteほか｜TechRacho by BPS株式会社](https://techracho.bpsinc.jp/hachi8833/2019_01_28/68986#2-1)
     - >「で、Railsでは従来const_missingが使われていていろいろ限度があったけど、ZeitwerkではKernel#autoloadを使ってるのか」
     - [Module#autoload (Ruby 3.0.0 リファレンスマニュアル)](https://docs.ruby-lang.org/ja/latest/method/Module/i/autoload.html)
       - `autoload(const_name, feature) -> nil`
-      - >定数 const_name を最初に参照した時に feature を Kernel. するように設定します。
+      - >定数 const_name を最初に参照した時に feature を `Kernel.#require` するように設定します。
   - [Rails アップグレードガイド - Railsガイド](https://railsguides.jp/upgrading_ruby_on_rails.html#%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%AE%E6%A7%8B%E6%88%90)
     - >ただしclassicモードは、見つからない定数名からファイル名を推測しますが（underscore）、zeitwerkモードはファイル名から定数名を推測します（camelize）。
     - >特に略語がからむ場合、これらのヘルパーの動作が互いにきれいに逆になるとは限りません。
