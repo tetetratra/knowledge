@@ -1,0 +1,50 @@
+---
+tags: "Ruby, MRI, yacc"
+---
+
+# MRIの評価
+
+- コールグラフ
+  - →`main`
+    - →`ruby_sysinit`
+    - →`rb_main`
+      - →`ruby_init`
+        - →`ruby_setup`
+          - 色々と初期化
+          - →`ruby_init_stack`
+          - →`Init_heap`
+          - →`Init_vm_objects`
+          - →`ruby_prog_init`
+      - →`ruby_options`
+        - 普通にRubyが起動した場合と、スレッドとして起動した場合で処理を分けをている?
+        - →`ruby_process_options`
+          - →`process_options`
+            - 文字列からASTを作っている? `ast = rb_parser_compile_string(parser, opt->script, opt->e_script, 1);`
+            - →`rb_parser_compile_string`
+              - →`rb_parser_compile_string_path`
+                - →`parser_compile_string`
+                  - →`yycompile`
+                    - →`yycompile0`
+                      - →`yyparse`
+                        - これは[Racc](Rubyのyacc)のライブラリ関数
+            - ASTからiseqを作っている? `iseq = rb_iseq_new_main(&ast->body, opt->script_name, path, vm_block_iseq(base_block));`
+            - →`rb_iseq_new_main`
+              - →`rb_iseq_new_with_opt`
+                - →`prepare_iseq_build`
+                - →`rb_iseq_compile_node`
+                - →`iseq_translate`
+      - →`ruby_run_node`
+        - →`ruby_init_stack`
+        - →`rb_ec_exec_node`
+          - →`rb_iseq_eval_main`
+            - →`vm_set_main_stack`
+            - →`vm_exec`
+              - →`vm_exec_core`
+                - `((rb_insn_func_t) (*GET_PC()))(ec, reg_cfp)` をwhileループ
+                - ダイレクトスレッデッドコードなので、この呼出先の最後にgotoが行われ、次の呼び出しに直接ジャンプするらしい
+- vm_exec.h に定義されている、ダイレクトスレッデッドコードをしてそうなマクロ`TC_DISPATCH`は、`END_INSN`マクロから呼び出されている。`END_INSN`は、 _insn_entry.erb によって自動生成される関数の末尾で使っている。
+  - コンパイル時に、YARV命令(`getlocal`など)は、最後にその次のYARV命令のアドレスにジャンプするようになっているということ？
+  - `TC_DISPATCH`では`goto *insns_address_table[GET_CURRENT_INSN()]`している
+    - `insns_address_table` は tool/ruby_vm/views/vmtc.inc.erb で作ってそう
+- [YARV instruction dispatch - Qiita](https://qiita.com/k0kubun/items/dbb2f0979f19f76eed26)
+  - insns.def の展開や、ダイレクトスレッデッドコードなどを説明している
