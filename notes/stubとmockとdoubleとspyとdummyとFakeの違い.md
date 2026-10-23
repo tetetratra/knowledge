@@ -4,7 +4,7 @@ tags: "stub, mock, double, spy, dummy, fake, スタブ, モック, ダブル, �
 
 # stubとmockとdoubleとspyとdummyとFakeの違い
 
-- [Rails tips: RSpecのスタブとモックの違い（翻訳）｜TechRacho by BPS株式会社](https://techracho.bpsinc.jp/?p=55467)
+- [Rails tips: RSpecのスタブとモックの違い（翻訳）｜TechRacho by BPS株式会社](https://techracho.bpsinc.jp/hachi8833/2018_04_25/55467)
 - [Test Double のタイプ達 - A Memorandum](https://blog1.mammb.com/entry/2023/02/27/194826)
 - ![図](../assets/03599e8f4629cb223989770ab033a6b9c37925deb442ce9b1313d604afa6e5f9.png)
 **Test Double のタイプの比較(引用)**
