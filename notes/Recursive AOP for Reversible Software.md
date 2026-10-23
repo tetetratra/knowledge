@@ -1,0 +1,99 @@
+---
+tags: "AOP, Aspect_Oriented_Programming, reversible computing, 可逆的コンピューティング, Janus, Erlang"
+---
+
+# Recursive AOP for Reversible Software
+
+- 著：Vaidas GIEDRIMAS
+- Siauliai University, Visinskio 38, Siauliai, Lithuania
+- Baltic J. Modern Computing, Vol. 7 (2019), No. 3, 430-435
+  - Baltic Journal of Modern Computing (BJMC)
+- https://www.semanticscholar.org/paper/Recursive-AOP-for-Reversible-Software-Giedrimas/bc8825303461f4f85fa9fb564028a894ad0eb0d4
+  - reversible computing
+    - RC
+    - 可逆的コンピューティング
+    - 応用
+      - ソフトウェアのデバッグ
+      - フォールトトレランスの向上
+        - 構成部品の一部が故障しても正常に処理を続行するシステム
+      - 量子コンピューティング
+  - 目的
+    - >present the idea to express opposite language elements by using recursive aspects.
+- 1. The model of reversibility
+  - プログラムは、状態の集合 OR 操作(action)の列で表せる
+  - 前に進むだけの(ふつうの)プログラムは、P1, P2, ...
+    - P1, P2はプログラムの行に対応
+  - ↑の逆プログラムは、R1,R2,...
+    - P1がRNに対応
+    - RはPの逆操作
+  - いくつかのPをまとめて打ち消すRがあることもある
+- 2. Aspectorientedapproach
+  - 再帰的な分解と、処理のステップにより、逆プログラムを生成できる
+    - Janus式とチェックポイント式がある
+    - Janus式ならすでにできている
+    - チェックポイント式だと難しい？
+- References
+  - Aspect-oriented model-driven skeleton code generation: A graph-based transformation approach
+    - Bennett et al. (2010)
+    - In Science of Computer Programming 75(8), 689 – 725.
+  - Avoiding infinite recursion with stratified aspects
+    - Bodden, E. et al. (2006).
+    - In: NODe/GSEM. LNI, vol. 88, pp. 49-64. GI
+  - A taxonomy of domain-specific aspect languages.
+    - Fabry, J. et al. (2015).
+    - ACM Comput. Surv. 47(3), 40:1-40:44 (Feb 2015). https://doi.org/10.1145/2685028
+  - A semantics of poincuts in AspectJ.
+    - Gang, X. et al. (2013).
+    - In IERI Procedia 4, 323 - 330, 2013 International Conference on Electronic Engineering and Computer Science (EECS 2013)
+  - A categorical foundation for structured reversible flowchart languages.
+    - Gluck, R., Kaarsgaard, R. (2018).
+    - In Electronic Notes in Theoretical Computer Science 336, 155 - 171, the Thirty- third Conference on the Mathematical Foundations of Programming Semantics (MFPS XXXIII)
+  - Cooperative aspect-oriented programming.
+    - Hoffman, K., Eugster, P. (2007).
+    - Science of Computer Programming 74(5), 333 – 354, In Special Issue on Principles and Practices of Programming in Java (PPPJ 2007)
+  - Join inverse categories and reversible recursion.
+    - Kaarsgaard, R. et al. (2017).
+    - Journal of Logical and Algebraic Methods in Programming 87, 33 – 50.
+  - Aspect-oriented programming
+    - Kiczales, G., Hilsdale, E. (2001).
+    - SIGSOFT Softw. Eng. Notes 26(5), 313-.
+  - AspectJ in Action: Enterprise AOP with Spring Applications
+    - Laddad, R. (2009).
+    - Manning Publications Co., Greenwich, CT, USA, 2nd ed.
+  - A theory of reversibility for Erlang
+    - https://arxiv.org/abs/1806.07100
+    - Lanese, I. et al. (2018).
+    - Journal of Logical and Algebraic Methods in Programming 100, 71 - 97
+  - Semantic based aspect-oriented programming for context-aware web service composition.
+    - Li, L. et al. (2011).
+    - Information Systems 36(3), 551 - 564, special Issue on WISE 2009 - Web Information Systems Engineering
+  - Janus: a time-reversible language
+    - Lutz, C. (1986).
+    - Available at http://tetsuo.jp/ref/janus.html, Letter to R. Landauer.
+  - Reversible computation:extending horizons of computing, state of the art report
+    - Mezzina, C.A., Schlatte, R. (2014).
+    - Working group 2, software and systems, Available at http://topps.diku.dk/ic1405/wg2_soar.pdf
+  - A class of reversible primitive recursive functions
+    - Paolini, L. et al. (2016).
+    - In Electronic Notes in Theoretical Computer Science 322, 227 – 242, Proceedings of ICTCS 2015, the 16th Italian Conference on Theoretical Computer Science
+  - Profiling with AspectJ
+    - Pearce, D.J. et al. (2007).
+    - Softw. Pract. Exper. 37(7), 747-777
+  - Reversible computation: extending horizons of computing, state of the art report
+    - Phillips, I., Thomsen, M.K. (2014)
+    - Working group 1, Foundations, Available at http://topps.diku.dk/ic1405/wg1_soar.pdf
+  - Aspect oriented programs: Issues and perspective
+    - Raheman, S.R. et al. (2018).
+    - Journal of Electrical Systems and Information Technology.
+  - Automatic detection of infinite recursion in AspectJ programs
+    - Salmi, M.F., Parsa, S. (2009).
+    - In: Future Generation Information Technology, First International Conference FGIT 2009, Jeju Island, Korea, December 10-12, 2009. Proceedings. pp. 190-197
+  - Dynamic slicing of distributed aspect-oriented programs: A context-sensitive approach.
+    - Singh, J. et al. (2017).
+    - Computer Standards Interfaces 52, 71 - 84
+  - Reversible computation and reversible programming languages.
+    - Yokoyama, T. (2010).
+    - Electronic Notes in Theoretical Computer Science 253(6), 71 – 81, In Proceedings of the Workshop on Reversible Computation (RC 2009)
+  - On the weaving process of aspect-oriented product family algebra
+    - Zhang, Q., Khedri, R. (2016).
+    - Journal of Logical and Algebraic Methods in Programming 85(1, Part 2), 146 – 172, Sp. Issue on Formal Methods for Software Product Line Engineering.
