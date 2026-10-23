@@ -1,0 +1,75 @@
+---
+tags: "', CSRF, json, PRGパターン, Websocket, Server-sent events, SPDY, QUIC, Public Suffix List, PSL, TLD, eTLD"
+---
+
+# HTTP
+
+- パーセントエンコーディング
+  - [Percent-encoding (パーセントエンコーディング) - MDN Web Docs 用語集: ウェブ関連用語の定義 | MDN](https://developer.mozilla.org/ja/docs/Glossary/percent-encoding)
+  - >パーセントエンコーディング（Percent-encoding）は、URL のコンテキストで特定の意味を持つ 8 ビット文字をエンコードするメカニズムです。URL エンコードとも呼ばれます。エンコードは置換で構成されます。'%' の後に、置換文字の ASCII 値の 16進表現が続きます。
+  - > エンコードが必要な特殊文字は、':', '/', '?', ' '', '', '@', '!', '$', '&', "'", '(', ')', '*', '+', ',', ';', '='、および '%' 自体です。他の文字もエンコードできますが、エンコードする必要はありません。
+- CSRF
+  - クロスサイトリクエストフォージェリ
+    - cross-site request forgeries
+  - 悪意の持ったサイトが自分のサイトに勝手なリクエストを送ってくることがあり、それを防ぐ技術
+  - HTTPの`X-Csrf-Token`ヘッダにトークンを入れなければ通らない
+  - html内からそのトークンをパースして、それをHTTPリクエストヘッダに含めて送れば対応出来る
+- オリジン ＝ スキーマ + ドメイン + ポート
+  - [同一オリジンポリシー - ウェブセキュリティ | MDN](https://developer.mozilla.org/ja/docs/Web/Security/Same-origin_policy)
+- jsonと生ファイルを同時に送りたい、ようなときは、
+  - `Content-Type: multipart/form-data; boundary=---------------------------974767299852498929531610575`
+  - [Content-Type - HTTP | MDN](https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Content-Type)
+  - [フロントエンド multipart/form-dataを理解してみよう - YoheiM .NET](https://www.yoheim.net/blog.php?q=20171201)
+  - boundaryの値に、境界用の印文字列
+- クロスオリジンだと、そのままではクッキーがセットされない
+  - [SPA認証トークン、Cookieに保存するか？LocalStorageに保存するか? - Qiita](https://qiita.com/T-Tokumori/items/b531d2c8612747dabe1e#%E6%8C%99%E5%8B%95%E3%82%92%E8%AA%BF%E6%9F%BB-spa%E3%81%A7%E4%BB%96%E3%81%AE%E3%83%89%E3%83%A1%E3%82%A4%E3%83%B3%E3%81%AEapi%E5%91%BC%E3%81%B3%E5%87%BA%E3%81%99%E3%81%A8%E3%81%8D%E3%81%A8%E3%81%8B)
+  - >リクエスト送信時にwithCredentials=trueをしないとset-cookie情報があってもブラウザがCookieをセットしてくれない
+  - >withCredentials=trueをしても、サーバ側でAccess-Controll-Allow-Credentials=trueをレスポンスヘッダにセットしないと、ブラウザがレスポンスを処理してくれない。ただし、Cookie情報は保存される。
+  - >ブラウザの設定でサードパーティCookieを拒否している場合、set-cookie情報があっても保存されない(Safariはデフォルトブロック)
+  - [オリジン間リソース共有 (CORS) - HTTP | MDN](https://developer.mozilla.org/ja/docs/Web/HTTP/CORS)
+  - > Fetch API は同一オリジンポリシーsame-origin policyに従います。つまり、これらの API を使用するウェブアプリケーションは、そのアプリケーションが読み込まれたのと同じオリジンに対してのみリソースのリクエストを行うことができ、それ以外のオリジンの場合は正しい CORS ヘッダーを含んでいることが必要です。
+- [CloudFront と API Gateway で SPA の CORS 問題をイイ感じに解決する | DevelopersIO](https://dev.classmethod.jp/articles/spa-cloudfront-and-api-gateway-voiding-cors/)
+- [オリジン間リソース共有 (CORS) - HTTP | MDN](https://developer.mozilla.org/ja/docs/Web/HTTP/CORS)
+  - CORSをやるのは厳しい
+- [webpack-dev-serverでCORS回避する - Qiita](https://qiita.com/k-saka/items/49f8a61ab32b6872c4cc)
+- [S3 CloudFront Route 53 でReactで作ったSPAを配信する - Qiita](https://qiita.com/keitakn/items/35ae8cc56f5c0a4766b4)
+- [rails-apiでcookieを使う - pockestrap](https://pocke.hatenablog.com/entry/2016/06/23/193232)
+  - APIモードなのを解除するのと、CORSをしない設定にする
+- [Ruby on Rails 5のAPIモードと非APIモードのファイル差分 - Qiita](https://qiita.com/61503891/items/d4eda649a10a3494830c)
+- [Rails API モードから非 API モードに変えたときに動かなくなったあれこれ - とんかつ時々あんどーなつ](https://kasaharu.hatenablog.com/entry/20170219/1487508340)
+- [SPAの場合のセッション（Cookie）認証におけるCSRF対策 - Qiita](https://qiita.com/dadayama/items/a0022b8f5f453a188e19)
+- [RailsのCSRF保護を詳しく調べてみた（翻訳）｜TechRacho（テックラッチョ）〜エンジニアの「？」を「！」に〜｜BPS株式会社](https://techracho.bpsinc.jp/?p=46891)
+  - SPA部分でどうCSRFをやるか
+- PRGパターン
+  - Post/Redirect/Get パターン
+  - Post後、Redirectを送ることで、ブラウザリロード時に再度Postされるのを防ぐ方法
+  - [Post/Redirect/Get (PRG) パターン - Qiita](https://qiita.com/furi/items/a32c106e9d7c4418fc9d)
+- [サーバサイドpush技術としてのWebsocketとServer-sent eventsの特徴比較 - Qiita](https://qiita.com/suin/items/e33af700ceb678d40a67)
+  - >どちらもサーバからpushできる技術
+  - > Websocketは双方向通信・SSE(Server-sent events)はサーバからクライアントへの単一方向通信
+  - > SSEはただのHTTPストリーミング
+  - > WebsocketはHTTPを拡張したプロトコル
+  - > 主な用途、チャット・リアルタイム通知・共同編集などリアルタイム通信
+- [HTTP の進化 - HTTP | MDN](https://developer.mozilla.org/ja/docs/Web/HTTP/Basics_of_HTTP/Evolution_of_HTTP)
+  - >HTTP/2 プロトコルには、HTTP/1.1 との大きな違いがいくつかあります:
+    - バイナリ
+    - 多重化
+    - ヘッダーを圧縮
+    - サーバープッシュ
+      - >リクエストより先にサーバーがクライアントのキャッシュにデータを加えることができます
+  - SPDYが元になってHTTP/2
+    - (HTTP/3はQUIC)
+  - HTTP/1.1から/2への切り替えは透過的だから、すぐに世の中に浸透した
+  - > HTTP/3 は、トランスポート層に TCP/TLS の代わりに QUIC を使用する予定です
+- [プロトコルのアップグレードメカニズム - HTTP | MDN](https://developer.mozilla.org/ja/docs/Web/HTTP/Protocol_upgrade_mechanism)
+  - プロトコルのアップグレード機能はHTTP/1.1のみ
+    - HTTP/2では利用不可
+  - 1.1→2, 1.1→websocket
+- Public Suffix List (PSL)
+  - `co.jp`みたいな、Top Level Domain (TLD)じゃないけれど実質的にそのような扱いを受けているものがある
+    - これを、Effective Top Level Domain (eTLD) という
+  - これらを集めたリストがPSL
+    - github上でボランティアで管理されている
+    - https://github.com/publicsuffix/list/blob/master/public_suffix_list.dat#L1910
+  - 関連記事：[BASEという大きなプロダクトでドメインを移行した話 - BASEプロダクトチームブログ](https://devblog.thebase.in/entry/2023/08/28/110000)
+    - >ATT で効果計測ができる条件として Public Suffix List(以下PSL) に thebase.in 登録することが必須条件となる
