@@ -204,7 +204,7 @@ rescue ActiveRecord::RecordInvalid => err
     | preload | する | 複数 | キャッシュ |
     | includes | する | 場合による | キャッシュ、必要なら絞り込み |
 
-  - includes以外のメソッドを用途別に使おう
+  - include以外のメソッドを用途別に使おう
   - [ActiveRecordを使うときは頭にSQLを描こう - Qiita](https://qiita.com/ham0215/items/bf99d3c44e029176c2af)
 
 - selectの使い所
@@ -215,14 +215,14 @@ rescue ActiveRecord::RecordInvalid => err
   - > If you do not provide a block to find_each, it will return an Enumerator for chaining with other methods:
 
 
-- [ActiveRecordを単体で使ってる場合のタイムゾーンの設定 - tyn-iMarketの技術メモ https://tyn-imarket.hatenadiary.org/entry/20131027/1382897686]
+- [ActiveRecordを単体で使ってる場合のタイムゾーンの設定 - tyn-iMarketの技術メモ](https://tyn-imarket.hatenadiary.org/entry/20131027/1382897686)
 
-- [RailsでArel、早見表 - Qiita https://qiita.com/k-fujino/items/09f8baf790abd49308f4]
+- [RailsでArel、早見表 - Qiita](https://qiita.com/k-fujino/items/09f8baf790abd49308f4)
 
 - `sanitize_sql_array`
 - SQLインジェクション対策用のクエリを文字列として作れる
 - `ActiveRecord::Base.sanitize_sql_array(['where id = ?', 1])`
-- [ActiveRecordのSanitization　初心者→中級者へのSTEP19/25 - Qiita https://qiita.com/kamohicokamo/items/6933e90237935c011efb]
+- [ActiveRecordのSanitization　初心者→中級者へのSTEP19/25 - Qiita](https://qiita.com/kamohicokamo/items/6933e90237935c011efb)
   ```ruby
   .joins(sanitize_sql_array([<<~EOS, var]))
   JOIN table_name
@@ -234,11 +234,11 @@ rescue ActiveRecord::RecordInvalid => err
 - `lock`でロックできる
 
 - `references`でLEFT OUTER JOIN
-- [似ているようで全然違う!?Activerecordにおけるincludesとjoinsの振る舞いまとめ - Qiita https://qiita.com/south37/items/b2c81932756d2cd84d7d]
+- [似ているようで全然違う!?Activerecordにおけるincludesとjoinsの振る舞いまとめ - Qiita](https://qiita.com/south37/items/b2c81932756d2cd84d7d)
 
 - テーブル`a`から`c`を、`a.b_id = c.b_id`でつなぐ
-- [ActiveRecord::Associations::ClassMethods https://api.rubyonrails.org/classes/ActiveRecord/Associations/ClassMethods.html#method-i-has_one]
-- [Active Record の関連付け - Railsガイド https://railsguides.jp/association_basics.html#belongs-to%E3%81%AE%E3%82%AA%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3-foreign-key]
+- [ActiveRecord::Associations::ClassMethods](https://api.rubyonrails.org/classes/ActiveRecord/Associations/ClassMethods.html#method-i-has_one)
+- [Active Record の関連付け - Railsガイド](https://railsguides.jp/association_basics.html#belongs-to%E3%81%AE%E3%82%AA%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3-foreign-key)
 - `a`のモデル定義の`has_one`に、`foreign_key: :b_id`と`primary_key: :b_id`を指定する
 - `foreign_key`
   - >Specify the foreign key used for the association. By default this is guessed to be the name of this class in lower-case and “_id” suffixed. So a Person class that makes a `has_one` association will use “person_id” as the default `:foreign_key`.
@@ -262,7 +262,7 @@ rescue ActiveRecord::RecordInvalid => err
 - delegated type
 - https://github.com/rails/rails/pull/39341
   - 入ったプルリク
-- [Rails: ActiveRecord::DelegatedType APIドキュメント（翻訳）｜TechRacho by BPS株式会社 https://techracho.bpsinc.jp/hachi8833/2022_04_12/112882]
+- [Rails: ActiveRecord::DelegatedType APIドキュメント（翻訳）｜TechRacho by BPS株式会社](https://techracho.bpsinc.jp/hachi8833/2022_04_12/112882)
   - プルリクの和訳
 - テーブルの共通のカラムは親テーブル＆親モデルで持つ
 - テーブルごとに違うカラムは子テーブル＆子モデルで持つ
@@ -300,9 +300,8 @@ rescue ActiveRecord::RecordInvalid => err
 
 
   - > 🔗 Rails 7版: Active Recordのさまざまなattribute更新系メソッドの比較リスト（Ruby Weeklyより）
-- [週刊Railsウォッチ: Active Recordのattribute更新系メソッド比較リスト、Railsリファクタリングガイドほか（20220425前編）｜TechRacho by BPS株式会社 https://techracho.bpsinc.jp/hachi8833/2022_04_25/117359#2-2]
-- [Different Ways to Set Attributes in ActiveRecord (Rails 7) https://scottbartell.com/2022/04/12/set-attributes-in-active-record-rails-7/]
-- ```
+- [週刊Railsウォッチ: Active Recordのattribute更新系メソッド比較リスト、Railsリファクタリングガイドほか（20220425前編）｜TechRacho by BPS株式会社](https://techracho.bpsinc.jp/hachi8833/2022_04_25/117359#2-2)
+- [Different Ways to Set Attributes in ActiveRecord (Rails 7)](https://scottbartell.com/2022/04/12/set-attributes-in-active-record-rails-7/)
 
 - [![図](../assets/5972f62350ed86d9d31fe6c2b3e44b9c9d1f9a7b9a69bf3a01e331b8c535f6ed.png)]
   - 一度のクエリで、scopeの付いた同一クラスのリレーションを複数扱うときは注意
