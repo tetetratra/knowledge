@@ -1,0 +1,52 @@
+---
+tags: "Stable Diffusion, LoRA, ファインチューニング, 転移学習"
+---
+
+# AI
+
+- Stable Diffusion
+  - https://github.com/Stability-AI/stablediffusion
+  - テキストから画像を生成
+  - 学習済みのモデル
+    - ニューラルネットワーク
+    - モデルを動かすのであれば普通のPC上でできる
+  - Stability AI が作った
+  - [AbdBarho/stable-diffusion-webui-docker: Easy Docker setup for Stable Diffusion with user-friendly UI](https://github.com/AbdBarho/stable-diffusion-webui-docker)
+    - `AbdBarho`版だと(M1)Macだとうまく動かなかった
+  - [M1 MacBook ProでStable Diffusionを動かすまでのメモ](https://zenn.dev/ktakayama/articles/6c627e0956f32c)
+  - [AUTOMATIC1111 版 stable-diffusion-webui を Mac で使う | 林檎コンピュータ](https://mac-ra.com/mac-automatic1111-stable-diffusion-webui/)
+    - `AUTOMATIC1111`版を試してみよう
+    - [Installation on Apple Silicon · AUTOMATIC1111/stable-diffusion-webui Wiki](https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Installation-on-Apple-Silicon)
+  - https://huggingface.co/CompVis/stable-diffusion-v-1-4-original
+    - 大本のモデルが置いてある場所
+- GPT-3
+  - OpenAIが論文として発表したアルゴリズム
+  - これを使ってOpenAIが学習を行い、作ったモデルで作ったサービスがChatGPTやOpenAI API
+  - これを使ってMicrosoftがが学習を行い、作ったモデルで作ったサービスがBingAI
+  - ↑どちらも学習したモデル(重みのパラメータ)は後悔されていない
+  - GPT-4が出た
+- LoRA (Low-Rank Adaptation)
+  - >LoRAは学習済みモデルを自分好みに改良するような目的で使用されるものであり，特にStable Diffusionなどで使われる際は，特定のキャラに特化させモデルを作る目的で使用されることがほとんどです．
+  - >LoRAはフルサイズのファインチューニングに比べて，はるかに高速で少ない計算量で学習が可能な技術です．
+    - [【Stable Diffusion】 LoRAの学習方法 | ぺんぎんや](https://e-penguiner.com/stable-diffusion-training-lora/)
+- ファインチューニング
+  - >あるデータセットを使って事前学習（Pre-training）した訓練済みモデルの一部もしくは全体を、別のデータセットを使って再トレーニングすること
+  - [ファインチューニング（Fine-tuning：微調整）とは？：AI・機械学習の用語辞典 - ＠IT](https://atmarkit.itmedia.co.jp/ait/articles/2301/26/news019.html)
+  - NNの層を追加することでチューニングする
+    - 転移学習も似たような方法による学習
+- 大規模言語モデル(LLM)はGPT系以外にもある
+  - GPT-3.5 (OpenAI)
+  - GPT-4
+  - PaLM (Google)
+  - LLaMA (Meta)
+- open-interpreter
+  - https://github.com/KillianLucas/open-interpreter
+  - [Open Interpreterの動かし方 | データアナリティクスラボ](https://dalab.jp/archives/journal/how-to-use-open-interpreter/)
+    - >ChatGPT Plusで提供されているCode Interpreterのローカル版
+    - > OpenAI APIを使う場合はAPIキーを取得しておいてください。
+    - > ※Open-Interpreterを動かすだけならCode Llamaというローカルで動くモデルが無料で使えますが、ある程度の精度で動かしてみたい人はAPIを使うのがよいと思います。ただしAPIは有料なので注意してください。
+- [エージェントの2つのルール: AIエージェントのセキュリティへの実践的なアプローチ](https://ai.meta.com/blog/practical-ai-agent-security/)
+  - 2つ以上満たすAIエージェントはセキュリティ的に危険
+    - A エージェントは信頼できない入力を処理できる
+    - B エージェントは機密システムや個人データにアクセスできる
+    - C エージェントは状態を変更したり外部と通信したりできる
