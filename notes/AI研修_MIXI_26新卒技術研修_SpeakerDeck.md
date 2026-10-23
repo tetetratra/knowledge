@@ -1,0 +1,96 @@
+---
+tags: "AI, 機械学習"
+---
+
+# AI研修【MIXI 26新卒技術研修】 - Speaker Deck
+
+- [AI研修(Day1)【MIXI 26新卒技術研修】 - Speaker Deck](https://speakerdeck.com/mixi_engineers/2026_new_grad_training_ai_day1)
+- [AI研修(Day2)【MIXI 26新卒技術研修】 - Speaker Deck](https://speakerdeck.com/mixi_engineers/2026_new_grad_training_ai_day2)
+- day1
+  - 1. 機械学習（ML）基礎
+    - ![図](../assets/96feaab7ba8c52f8b18cc3afde9a469ac7bdde89e245bd8935670dfa12fb4e04.png)
+    - 教師あり学習
+      - 分類 (classification) と回帰 (regression)
+        - 分類：出力が離散値
+        - 回帰：出力が連続値
+    - 教師なし学習
+      - 次元削減
+        - 構造が不明な（ラベル付けされていない）データを扱い、データ内のパターンを見つける学習
+    - 強化学習
+      - 報酬を受取りながら学習を進める
+  - 2. MLモデルの推論
+    - 3段階のフェーズがある
+      - 前処理(preprocess)
+        - 入力をテンソル(tensor)(多次元配列)に変換する
+      - モデル計算(model inference)
+        - tensorをモデルに入れて、出力tensorを得る
+      - 後処理(postprocess)
+        - 出力tensorを、タスクに適した形にデコード
+    - 「テーブルデータ」「自然言語処理」「画像処理」「音声処理」それぞれについての↑の手法が紹介されているが、省略
+    - モデルの性能を評価するにあたって適切な手法を選ぶのが大事
+  - 3. MLモデルの学習
+    - 「訓練データ」「検証データ」「テストデータ」の3種類必要
+    - 過学習を防ぐ色々な工夫(手法)がある
+    - ドメイン適用：学習済みモデルの一部を利用して、追加で解きたいタスクの学習をさせること
+      - 手法
+        - 転移学習(transfer learning)
+          - 追加した層の重みのみ更新する（学習にかかるコスト少なめ）
+          - 出力形式が変わる場合はこっち
+        - ファインチューニング(fine-tuning)
+          - 全てのパラメーターの重みを更新する
+          - 出力形式が変らない場合にはこっち
+  - 4. MLモデルの評価
+  - 5. MLモデルの高速化
+  - 6. MLモデルのデプロイ・運用
+    - MLOpsとは：開発・デプロイ・モニタリングまでのMLのライフサイクルの管理
+      - テスト追跡
+        - テストと結果を追跡して最適なモデルを特定する
+      - モデルのデプロイ
+        - 本番環境にモデルをデプロイして、アプリケーションからアクセスできるようにする
+      - モデルのモニタリング
+        - モデルをモニタリングして、パフォーマンスの問題や低下を検出する
+      - モデルの再トレーニング
+        - 新しいデータでモデルを再トレーニングしてパフォーマンスを改善する
+    - Vertex AI
+      - GCPが提供するMLプラットフォーム
+      - MLOpsに必要なものを提供している
+      - ![図](../assets/ea2b7ff97929672d48178f3151c19a0eb9ec8e553c57e9cf1458f4bcf8c83471.png)
+  - 7. まとめ
+- day2
+  - 1. LLMの内部構造
+    - 言語モデル、分散表現、トークン化
+    - Attention機構とTransformer
+      - RNN
+        - 1文字ずつ生成する手法
+        - GPUを活かせない
+      - seq2seq with attention
+        - RNNをベースに、重要な単語に重みを付ける
+        - 依然として並列化できないのでGPUは活かせず
+      - transformer
+        - 論文「attention is all you need」(2017)
+        - 全トークンを同時に処理する
+          - ので、GPUを活用できる
+        - 「主語述語関係」「装飾非装飾関係」「文脈的な依存」など、各種のattentionを並行実行する
+        - トークン数Nに対してO(N^2)のメモリ消費
+    - GPT、BERT、最新トレンド（MoE、CoT、推論モデル）
+      - CoT (chain of thought)：思考過程を出力させることで論理的推論を可能にする
+  - 2. 画像生成とマルチモーダル
+    - 拡散モデルの仕組み
+    - ViT、CLIP
+    - テキスト・画像・音声の統合
+      - マルチモーダル間でattentionをつけることで実現
+      - たとえば画像のベクトル表現をベクトルDBに保存しておくことで、ユーザーが自然言語で画像を検索できるようになる
+  - 3. LLMアプリケーション
+    - API, Context, RAG
+    - function calling、構造化出力
+  - 4. Al Agent
+    - workflow, agentic loop
+    - ReAct, Plan and solve
+      - ReAct：reasoning(推論)とaction(実行)
+    - LLM-as-a-judge, Human-in-the-loop
+      - Human-in-the-loop：重要な判断ポイントで人間の承認を挟む
+      - LLMアプリケーションの評価
+        - 出力の評価
+          - 想定回答と実際の回答を比較してスコア化する
+        - 出力までの過程の評価
+          - 思考過程やツール呼び出しがうまくいっているか
