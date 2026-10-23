@@ -4,9 +4,9 @@
     "除外プロフィールページ": 1,
     "移行済み元ページ": 461,
     "保留元ページ": 0,
-    "分割した元ページ": 26,
-    "分割先記事": 138,
-    "最終Markdown記事": 573,
+    "分割した元ページ": 16,
+    "分割先記事": 74,
+    "最終Markdown記事": 519,
     "保存画像": 206,
     "push実行": true,
     "push先": "https://github.com/tetetratra/knowledge"
@@ -459,13 +459,9 @@
       "status": "移行済み",
       "import_commit": "f6c8da7",
       "files": [
-        "notes/Notion RSS ReaderをOSSとして開発した話.md",
-        "notes/RailsでのGraphQLの良さとツラミ.md",
-        "notes/Time-based One-Time Passwordとrotp.md",
-        "notes/Vueでつまった実装あれこれ.md",
-        "notes/Carely Design System奮闘記.md"
+        "notes/Carely Tech Zine No.1.md"
       ],
-      "split_commit": "3823794"
+      "book_merge_commit": "3a82fba"
     },
     {
       "source_page_id": "664ebd5d15899a001ce7591e",
@@ -1287,49 +1283,27 @@
       "status": "移行済み",
       "import_commit": "e246797",
       "files": [
-        "notes/すごいHaskell_はじめの第一歩.md",
-        "notes/すごいHaskell_型を信じろ.md",
-        "notes/すごいHaskell_関数と高階関数.md",
-        "notes/すごいHaskell_モジュール.md",
-        "notes/すごいHaskell_型やクラスを作る.md",
-        "notes/すごいHaskell_入出力.md",
-        "notes/すごいHaskell_アプリカティブファンクター.md",
-        "notes/すごいHaskell_モノイド.md",
-        "notes/すごいHaskell_モナドとZipper.md"
+        "notes/すごいHaskellたのしく学ぼう.md"
       ],
-      "split_commit": "c346699"
+      "book_merge_commit": "ccdea39"
     },
     {
       "source_page_id": "5ff05c059067390021d32ffe",
       "status": "移行済み",
       "import_commit": "afc27c2",
       "files": [
-        "notes/Rubyのしくみ_解析とコンパイル.md",
-        "notes/Rubyのしくみ_コード実行.md",
-        "notes/Rubyのしくみ_制御構造とメソッド.md",
-        "notes/Rubyのしくみ_オブジェクトとクラス.md",
-        "notes/Rubyのしくみ_探索とハッシュテーブル.md",
-        "notes/Rubyのしくみ_ブロックとクロージャ.md",
-        "notes/Rubyのしくみ_メタプログラミング.md"
+        "notes/Rubyのしくみ.md"
       ],
-      "split_commit": "4f9cd14"
+      "book_merge_commit": "b97d00e"
     },
     {
       "source_page_id": "61b165b30e28a9001f35d6f0",
       "status": "移行済み",
       "import_commit": "b847199",
       "files": [
-        "notes/暗号の基礎知識.md",
-        "notes/アルゴリズムと安全性.md",
-        "notes/共通鍵暗号.md",
-        "notes/公開鍵暗号.md",
-        "notes/認証-1f35d6f0-05.md",
-        "notes/公開鍵基盤.md",
-        "notes/TLS.md",
-        "notes/ネットワークセキュリティ.md",
-        "notes/高機能な暗号技術.md"
+        "notes/暗号と認証のしくみと理論がこれ1冊でしっかりわかる教科書.md"
       ],
-      "split_commit": "53eb059"
+      "book_merge_commit": "5af5054"
     },
     {
       "source_page_id": "604c713b18a69a00220b2885",
@@ -1398,14 +1372,9 @@
       "status": "移行済み",
       "import_commit": "c13b0d3",
       "files": [
-        "notes/アプリケーションの基本原則.md",
-        "notes/アプリケーションの可視化.md",
-        "notes/サーバーレスとコンテナ.md",
-        "notes/CI_CDパイプライン.md",
-        "notes/データベース選択.md",
-        "notes/モダンアプリケーションの設計パターン.md"
+        "notes/AWSで実現するモダンアプリケーション入門.md"
       ],
-      "split_commit": "995df80"
+      "book_merge_commit": "52ecd0b"
     },
     {
       "source_page_id": "5e8ac5e6797e1d0017a95207",
@@ -1484,23 +1453,18 @@
       "status": "移行済み",
       "import_commit": "431bffd",
       "files": [
-        "notes/型システム入門_型無しの計算体系.md",
-        "notes/型システム入門_単純型.md",
-        "notes/型システム入門_高度な型システム.md"
+        "notes/型システム入門.md"
       ],
-      "split_commit": "0cba2b1"
+      "book_merge_commit": "91085bb"
     },
     {
       "source_page_id": "6777ea0e5e4fab11ded02346",
       "status": "移行済み",
       "import_commit": "2b550a0",
       "files": [
-        "notes/社会保険・労働保険の全体像.md",
-        "notes/労働保険と雇用保険.md",
-        "notes/社会保険と健康保険.md",
-        "notes/年金制度.md"
+        "notes/「社会保険・労働保険のしくみと手続き」.md"
       ],
-      "split_commit": "5184bea"
+      "book_merge_commit": "57ecaa3"
     },
     {
       "source_page_id": "6a96bf311b17bd5ab07a5865",
@@ -1636,11 +1600,9 @@
       "status": "移行済み",
       "import_commit": "da2d616",
       "files": [
-        "notes/Linuxのしくみ_ユーザーモードとシステムコール.md",
-        "notes/Linuxのしくみ_プロセスとスケジューラ.md",
-        "notes/Linuxのしくみ_メモリと記憶階層.md"
+        "notes/試して理解_Linuxのしくみ.md"
       ],
-      "split_commit": "1412ed3"
+      "book_merge_commit": "ec077eb"
     },
     {
       "source_page_id": "65e7076c3782e30027c41e81",
@@ -2577,21 +2539,9 @@
       "status": "移行済み",
       "import_commit": "b78f6c8",
       "files": [
-        "notes/1章 Ruby on Railsの概要.md",
-        "notes/2章 Ruby on RailsとMVC.md",
-        "notes/3章 押さえておきたいRailsの基本機能.md",
-        "notes/4章 フロントエンドの開発手法.md",
-        "notes/5章 Rails標準の機能を活用して素早く機能実装する.md",
-        "notes/6章 Railsアプリケーション開発.md",
-        "notes/7章 Railsアプリケーションのテスト.md",
-        "notes/8章 Railsアプリケーション拡張.md",
-        "notes/9章 コード品質を上げる.md",
-        "notes/10章 コンテナを利用したRailsアプリケーションの運用.md",
-        "notes/11章 複雑なドメインを表現する.md",
-        "notes/12章 複雑なユースケースを実現する.md",
-        "notes/13章 複雑なデータ操作を実装する.md"
+        "notes/パーフェクトRuby on Rails.md"
       ],
-      "split_commit": "bd4c85b"
+      "book_merge_commit": "1a07e74"
     },
     {
       "source_page_id": "644722921d2d6e001b3a4485",
@@ -3428,13 +3378,9 @@
       "status": "移行済み",
       "import_commit": "92f2932",
       "files": [
-        "notes/第1章　さあ、どんな言語を作ろう.md",
-        "notes/第2章　新言語「Streem」の設計と実装.md",
-        "notes/第3章　オブジェクト指向機能を設計する.md",
-        "notes/第4章　Streemオブジェクトを実装する.md",
-        "notes/第5章　ストリームプログラミングを強化する.md"
+        "notes/言語のしくみ.md"
       ],
-      "split_commit": "10a3ebb"
+      "book_merge_commit": "56e5c28"
     },
     {
       "source_page_id": "5ecb39dad4a2240024b2718d",
