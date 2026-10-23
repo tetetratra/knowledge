@@ -5,7 +5,7 @@ tags: "Kubernetes, K8s, GKE, Pod, ReplicaSet, Deployment"
 # KubernetesとGKEの基礎
 
 - day2
-- [コンテナ・K8s研修【MIXI 26新卒技術研修】 - Speaker Deck](https://speakerdeck.com/mixi_engineers/2026_new_grad_training_container_gke)
+- [コンテナ・K8s研修【MIXI 26新卒技術研修】#2 - Speaker Deck](https://speakerdeck.com/mixi_engineers/2026_new_grad_training_container_gke)
 - k8s
   - コンテナオーケストレーションツール
   - 使う理由
