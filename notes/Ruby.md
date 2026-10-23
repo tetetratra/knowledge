@@ -157,26 +157,26 @@ rubyのhashは順序がある。(1.9から)
  コーディング規約にも、順序を信じてOKと書いてある
 
 `OpenURI.open` の返り値は`StringIO` だけど、 `OpenURI::Meta` をextendしているから、`#meta` とかが使える
-	>サーバから取得したデータの属性を扱うために使われるモジュールです。データを表す文字列や StringIO が extend します。
+  >サーバから取得したデータの属性を扱うために使われるモジュールです。データを表す文字列や StringIO が extend します。
  [module OpenURI::Meta (Ruby 2.7.0 リファレンスマニュアル) https://docs.ruby-lang.org/ja/latest/class/OpenURI=3a=3aMeta.html]
 
 [module Open3 (Ruby 2.2.0) https://docs.ruby-lang.org/ja/2.2.0/class/Open3.html] でターミナルコマンドのstderrとかも取れる
 
 injectでindexも使うには
-	[each_with_indexしつつinjectしたい - Qiita https://qiita.com/ymstshinichiro/items/366b738ceefd224b5d41]
-	`(1..3).each.with_index.inject([]) { |r , (val, idx)| r << [val , idx] }`
-		`each.with_index`で出来るのはあくまでイテレーター
-		`(val, idx)`が`each.with`で出来たもの。
-		`r`が`inject`のmemo側. `(val, idx)`がitem側
+  - [each_with_indexしつつinjectしたい - Qiita https://qiita.com/ymstshinichiro/items/366b738ceefd224b5d41]
+  - `(1..3).each.with_index.inject([]) { |r , (val, idx)| r << [val , idx] }`
+    - `each.with_index`で出来るのはあくまでイテレーター
+    - `(val, idx)`が`each.with`で出来たもの。
+    - `r`が`inject`のmemo側. `(val, idx)`がitem側
 
 anddotを記号メソッドに使うには`arr&.[] ind`
  [【一人 Ruby Advent Calendar 2017】Ruby の &. 演算子【14日目】 - Secret Garden(Instrumental) http://secret-garden.hatenablog.com/entry/2017/12/15/000505]
 
 `&&`は式、`and`は文
-	https://twitter.com/yukihiro_matz/status/1242106330149605377
-	()で囲めば文は式になる
-	[プログラム・文・式 (Ruby 2.4.0 リファレンスマニュアル) https://docs.ruby-lang.org/ja/2.4.0/doc/spec=2fprogram.html]
-	 >メソッドの引数に指定できない式は、括弧によるグルーピングを行うことで普通の式として使用することができます。
+  - https://twitter.com/yukihiro_matz/status/1242106330149605377
+  - ()で囲めば文は式になる
+  - [プログラム・文・式 (Ruby 2.4.0 リファレンスマニュアル) https://docs.ruby-lang.org/ja/2.4.0/doc/spec=2fprogram.html]
+   >メソッドの引数に指定できない式は、括弧によるグルーピングを行うことで普通の式として使用することができます。
 
 - なのでこうなる
 **main.rb**
@@ -197,10 +197,10 @@ RubyにはJIS規格がある
  調べればpdfが出てくるけれど、本来有料のものみたいだから正規なものかは怪しい...
 
 モジュール関数とは
-	モジュールの関数
-	`Kernel.#require`とか
-	モジュールだからdef self.hogeの関数作成はできなくて、moduel_methodを呼び出してから定義する。
-	クラスメソッドと使われ方や見た目は同じそう
+  - モジュールの関数
+  - `Kernel.#require`とか
+  - モジュールだからdef self.hogeの関数作成はできなくて、moduel_methodを呼び出してから定義する。
+  - クラスメソッドと使われ方や見た目は同じそう
 
 setterメソッドの呼び出しには明示的なレシーバーが必要
 
@@ -236,7 +236,7 @@ enumratorの連結ってどうやるんだろう
  lazy系を使う?
 
 ターミナル入力操作のexpectコマンドみたいなのをRubyから扱えるライブラリ
-	[IO#expect (Ruby 2.7.0 リファレンスマニュアル) https://docs.ruby-lang.org/ja/latest/method/IO/i/expect.html]
+  - [IO#expect (Ruby 2.7.0 リファレンスマニュアル) https://docs.ruby-lang.org/ja/latest/method/IO/i/expect.html]
 
 procを抜けるにはnext
  returnだと外側のメソッドを抜けてしまう
@@ -274,14 +274,14 @@ https://docs.ruby-lang.org/ja/latest/library/set.html
 Rubyは各々のstringごとに、自身の文字コードの情報を持っている
 
 gsub時にエラーになるときは
-	`ArgumentError invalid byte sequence in UTF-8` と出てくるとき
-	`String#scrub`
-		[String#scrub (Ruby 2.7.0 リファレンスマニュアル) https://docs.ruby-lang.org/ja/latest/method/String/i/scrub.html]
+  - `ArgumentError invalid byte sequence in UTF-8` と出てくるとき
+  - `String#scrub`
+    - [String#scrub (Ruby 2.7.0 リファレンスマニュアル) https://docs.ruby-lang.org/ja/latest/method/String/i/scrub.html]
  [Ruby 2.1.0 に追加される不正なバイト列を除去する String#scrub の紹介 - sonots:blog http://blog.livedoor.jp/sonots/archives/34702351.html]
  [Ruby の invalid byte sequence in UTF-8 例外を encode("UTF-8", "UTF-8") で回避するのはおかしいよ、という話 - sonots:blog http://blog.livedoor.jp/sonots/archives/23652294.html]
 
 [library kconv (Ruby 2.7.0 リファレンスマニュアル) https://docs.ruby-lang.org/ja/latest/library/kconv.html]
-	>日本語文字コードの変換を手軽に行うためのライブラリです。
+  >日本語文字コードの変換を手軽に行うためのライブラリです。
  > kconv を require すると String クラスに変換用のメソッドが定義されます。 Kconv にも同等のメソッドが定義されます。 Kconv にはエンコーディングを表す定数も定義されています。
  `string.tojis`
 
@@ -357,16 +357,16 @@ irb(main):005:0> RUBY_VERSION
 `ruby --dump=parsetree`で構文木を見れる
 
 ロードパスをコマンドラインから調べるには `ruby -e 'puts $:'`
-	[$-I (Ruby 3.0.0 リファレンスマニュアル) https://docs.ruby-lang.org/ja/latest/method/Kernel/v/=3a.html]
+  - [$-I (Ruby 3.0.0 リファレンスマニュアル) https://docs.ruby-lang.org/ja/latest/method/Kernel/v/=3a.html]
 
 Rakeのファイルタスクは実行されないときもある。ファイルタスクはファイルを作るタスクだから
-	関連するファイルが存在しない場合
-	事前タスクで作成したファイルの方が新しい場合
-	[library rake (Ruby 3.0.0 リファレンスマニュアル) https://docs.ruby-lang.org/ja/latest/library/rake.html]
+  - 関連するファイルが存在しない場合
+  - 事前タスクで作成したファイルの方が新しい場合
+  - [library rake (Ruby 3.0.0 リファレンスマニュアル) https://docs.ruby-lang.org/ja/latest/library/rake.html]
 
 [列挙型]っぽいやつはどうやって実現されているのか
-	値の部分はどうなっているのか
-	連番を入れているだけっぽい
+  - 値の部分はどうなっているのか
+  - 連番を入れているだけっぽい
  https://github.com/ruby/logger/blob/master/lib/logger/severity.rb
 ```ruby
 module Severity
@@ -403,7 +403,7 @@ module Severity
   > モジュール内
  > メソッドのスコープ内ではrefinementを有効にできません。
  > refinementが有効なのは、現在のクラス定義またはモジュール定義が終わるまでの間です。
- > [** トップレベルの場合は、現在のファイルの最下部まで]となります。
+ > **トップレベルの場合は、現在のファイルの最下部まで**となります。
 
 昔のRubyをとれるサイト
  https://cache.ruby-lang.org/pub/
@@ -438,7 +438,7 @@ Rubyで使える[並列処理]・[並行処理]の内部実装
 
 [Fiber Scheduler]
  [Fiber Schedulerの使い方 - マイペースなRailsおじさん https://ytnk531.hatenablog.com/entry/2020/10/24/183321]
-  >Fiber Schedulerは、Ruby3で追加される予定の、Fiberの新機能です。IOを扱うファイバーを複数作って、これらを適切にコンテキストスイッチしてあげると、Threadを使うよりも高い並行性を得られるという話があります。[** Fiber Schedulerは、このコンテキストスイッチを実装しやすくするための機能]で、もともとはAuto Fiberと呼ばれていました。
+  >Fiber Schedulerは、Ruby3で追加される予定の、Fiberの新機能です。IOを扱うファイバーを複数作って、これらを適切にコンテキストスイッチしてあげると、Threadを使うよりも高い並行性を得られるという話があります。**Fiber Schedulerは、このコンテキストスイッチを実装しやすくするための機能**で、もともとはAuto Fiberと呼ばれていました。
  Fiber Schedulerは日本語版ドキュメントにはまだ載っていないかも?
   英語版には`Fiber.schedule`が書かれている：[class Fiber - RDoc Documentation https://docs.ruby-lang.org/en/3.0/Fiber.html#method-c-schedule]
  Schedulerを作って登録して、`Fiber.schedule`を呼び出すと、IO処理ごとにSchedulerに定義したメソッドが呼ばれるので、そのメソッド内でfiberの切り替え処理を書けば、IOを並行に処理できるようになる
@@ -469,10 +469,10 @@ class A
 [Rubyの外部コマンド実行入門について発表しました - pockestrap https://pocke.hatenablog.com/entry/2023/02/19/004700]
 
 エラー情報を文字列に埋め込むときは`#inspect`しよう
-	`#to_s`だと情報が減る
+  - `#to_s`だと情報が減る
 
 `disable-pry`すると、サーバー再起動するまでdisableし続けてしまう問題
-	内部実装では`ENV['DISABLE_PRY'] = 'true'`とすることでフラグを管理している
+  - 内部実装では`ENV['DISABLE_PRY'] = 'true'`とすることでフラグを管理している
   - 元に戻し方
     - 外側から(大抵はdockerの)サーバーのプロセスの環境変数を書き換えるのは... 無理そう
     - `binding.pry`していた箇所の直前に`ENV['DISABLE_PRY'] = nil`と書けばよい
