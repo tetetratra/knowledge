@@ -1,0 +1,124 @@
+---
+tags: "RubyKaigi, Ruby, 7, rubykaigi, 9, 8, 6, 5, 4, 3, 2, 1, Ruby meets WebAssembly, Wasm, 保守的GC, Making MaNy threads on Ruby, M:N, Ractor, Building a Lightweight IR and Backend for YJIT, chrome dev tool, Towards Ruby 4 JIT, mjit, Julia, numba, VWA, Wireshark, dRuby, Implementing Object Shapes in CRuby, Hunting Production Memory Leaks with Heap Sampling, RBS"
+---
+
+# RubyKaigi 2022
+
+- in 三重
+  - https://rubykaigi.org/2022/schedule/
+  - ruby-jp/RubyKaigi 2022
+- 登壇ブログ
+  - [Method-based JIT compilation by transpiling to Julia - Speaker Deck](https://speakerdeck.com/mrkn/method-based-jit-compilation-by-transpiling-to-julia)
+  - [RubyKaigi 2022 に登壇した - koicの日記](https://koic.hatenablog.com/entry/make-rubocop-super-fast)
+  - [Make RuboCop Super Fast - Speaker Deck](https://speakerdeck.com/koic/make-rubocop-super-fast)
+  - [Ruby x BPF in Action / RubyKaigi 2022 - Google スライド](https://docs.google.com/presentation/d/1z9fGEL2eordrMifVLh7DcHw8M9tfhJVZgTpkTbMfp-k/edit#slide=id.g144e9c93adb_0_0)
+  - [Adding Type Signatures into Ruby Docs - Speaker Deck](https://speakerdeck.com/colby/adding-type-signatures-into-ruby-docs)
+  - [Towards Ruby 4 JIT / RubyKaigi 2022 - Speaker Deck](https://speakerdeck.com/k0kubun/rubykaigi-2022)
+  - [RubyKaigi2022で発表した - スペクトラム](https://ksss9.hatenablog.com/entry/2022/09/11/100155)
+- ブログ
+  - yuiseki/RubyKaigi 2022 メモ
+  - [RubyKaigi2022-1日目メモ - にふうち回避](https://nifuuchi-study.hatenablog.jp/entry/2022/09/08/234024)
+  - [RubyKaigi2日目感想 - にふうち回避](https://nifuuchi-study.hatenablog.jp/entry/2022/09/09/225601)
+  - [【随時更新】RubyKaigi2022リアルタイムレポ Day2｜noteエンジニアチーム【公式note】](https://engineerteam.note.jp/n/ncbb5259f1a86)
+  - [RubyKaigi 2022 参加記  - Make RuboCop super fast (Day 2) | Wantedly Engineer Blog](https://www.wantedly.com/companies/wantedly/post_articles/431073?utm_source=t.co&utm_medium=share&lang=ja)
+  - [DeNA エンジニアのみんなで RubyKaigi 2022 を視聴しました！ | BLOG - DeNA Engineering](https://engineering.dena.com/blog/2022/09/rubykaigi_2022_online_viewed_report/)
+  - [RubyKaigi2022 day1 感想｜えりりん｜note](https://note.com/sq_engch5/n/ne4be0051380b)
+  - [RubyKaigi1日目 Zuruzuru Blog 🍜< ズルズル](https://zuruzurura.men/blog/2022-09-08-rubykaigi1%E6%97%A5%E7%9B%AE)
+  - [【随時更新】RubyKaigi2022リアルタイムレポ Day1 （企業ブース紹介）｜noteエンジニアチーム【公式note】](https://engineerteam.note.jp/n/n399d1e2c87cc)
+  - [WantedlyはRubyKaigi2022にプラチナプランとして協賛し、技術書と開発に役立つHandbookをブースでプレゼントしています  | Wantedly, Inc.](https://www.wantedly.com/companies/wantedly/post_articles/430335)
+  - [RubyKaigi 2022 参加記  - さまざまな最適化手法に関する発表 (Day2) | Wantedly, Inc.](https://www.wantedly.com/companies/wantedly/post_articles/431275)
+  - [RubyKaigi 2022 参加記  - How fast really is Ruby 3.x? (Day2) | Wantedly Engineer Blog](https://www.wantedly.com/companies/wantedly/post_articles/431185)
+  - [RubyKaigi 2022 参加記  - Make RuboCop super fast (Day 2) | Wantedly Engineer Blog](https://www.wantedly.com/companies/wantedly/post_articles/431073)
+  - [RubyKaigi2022 参加記  - Contribute to Ruby (Day 2 Keynote) | Wantedly Engineer Blog](https://www.wantedly.com/companies/wantedly/post_articles/431015)
+  - [RubyKaigi2022 参加記  - Making *MaNy* threads on Ruby (Day 1) | Wantedly Engineer Blog](https://www.wantedly.com/companies/wantedly/post_articles/430779?utm_source=t.co&utm_medium=share&lang=ja)
+  - [RubyKaigi 2022 参加記  - Tools for Providing rich user experience in debugger(Day 1) | Wantedly Engineer Blog](https://www.wantedly.com/companies/wantedly/post_articles/430813?utm_source=t.co&utm_medium=share&lang=ja)
+  - [RubyKaigi 2022 参加記  - Types teaches success, what will we do?(Day1) | Wantedly Engineer Blog](https://www.wantedly.com/companies/wantedly/post_articles/430812?utm_source=t.co&utm_medium=share&lang=ja)
+  - [RubyKaigi 2022 参加記  - YJIT 開発チームからの発表 (Day1) | Wantedly Engineer Blog](https://www.wantedly.com/companies/wantedly/post_articles/430807?utm_source=t.co&utm_medium=share&lang=ja)
+  - [RubyKaigi 2022 参加記  - Ruby meets WebAssembly(Day1 Keynote) | Wantedly Engineer Blog](https://www.wantedly.com/companies/wantedly/post_articles/430691)
+  - [RubyKaigi 2022 セッションレポート Day 1 - メドピア開発者ブログ](https://tech.medpeer.co.jp/entry/2022/09/09/144431)
+  - [RubyKaigi 2022 セッションレポート Day 2 - メドピア開発者ブログ](https://tech.medpeer.co.jp/entry/2022/09/10/145451)
+  - [RubyKaigi 2022 Ruby meets WebAssembly - マイペースなRailsおじさん](https://ytnk531.hatenablog.com/entry/2022/09/11/121245)
+  - [RubyKaigi2022 day0 感想｜えりりん｜note](https://note.com/sq_engch5/n/n43c205996c3e)
+  - [RubyKaigi2022 Day1~Day3参加レポート｜kmkkiii｜note](https://note.com/kmkkiii/n/n44a42e8681e2)
+  - [RubyKaigi2022 覚書と感想 - 補習ほぼ確](https://ave-h.hateblo.jp/entry/2022/09/10/212025)
+  - [RubyKaigi 2022 09/09(2日目) 参加レポート - Qiita](https://qiita.com/yoshiki-0428/items/8102ceb4694c978ed9f0)
+  - [RubyKaigi 2022 09/08(初日) 参加レポート - Qiita](https://qiita.com/yoshiki-0428/items/b3a64e2f03efc9394f39#making-many-threads-on-ruby)
+- **Day 1**
+  - Ruby meets WebAssembly
+    - 良かった
+    - Wasm 対応
+    - C→Wasmの変換機を利用して対応
+    - 例外, [fiber](コルーチン), 保守的GCが、Wasmが提供している機能で実現するのが難しい
+    - プログラム変換で対応した
+  - Making MaNy threads on Ruby
+    - 1:N → 1:1 → M:N
+    - Ractorとかで便利になる
+    - タイマースレッドでユーザースレッドを切り替える
+    - DNSを解決する処理？とかが、外側から終了させられない？ので、制御が難しい
+      - そういう処理は別のスレッドで実行させることで解決した？
+  - Building a Lightweight IR and Backend for YJIT
+    - 難しかった...
+  - Tools for Providing rich user experience in debugger
+    - chrome dev tool上でGUIデバッグができる
+    - フレームをup, downして、ローカル変数とかを見れる
+  - Towards Ruby 4 JIT
+    - 3.1までのmjitはCで実装されていた
+    - 3.2からはRubyで実装される
+    - モンキーパッチを当てることができる
+      - 自分だけの最強のjitを作ろう、ができる
+    - コンパイル後のYARVバイトコード or C関数を返すことで、オリジナルのjitが作れる？
+    - jitコンパイルは1回目の呼び出し後に起こる?
+      - 2回目以降の呼び出しでは変な動きをする関数、などを作れる
+    - Ruby 4では定数畳み込み?とかを頑張って高速化したい
+  - TRICK 2022 (Returns)
+    - ローカル変数の有無で、コマンド風メソッド呼び出しと正規表現リテラルのどちらでパースされるかが決まる文法があって、それを悪用している作品が面白かった
+    - 優勝作品は誤り訂正符号を使って、動く金魚鉢のAAを描く作品
+- **Day 2**
+  - Matz Keynote
+    - お金の話とか
+  - Ruby debugger - The best investment for your productivity
+  - Method-based JIT compilation by transpiling to Julia
+    - Juliaは、型が一定であることを検知して、その情報を利用して高速化できる
+      - jitが効くから？(忘れた)
+    - Pythonのnumbaライブラリは、メタプロをしていないPythonを、メタプロチェックを取り除いたPythonバイトコードに変換することで高速化するライブラリ
+    - RubyをJuliaに変換することで、namdaのようなことをしようというプロジェクト
+    - 実際早くなっていた
+  - Heaping on the complexity! An adventure in GC Compaction
+    - 前半はVWAについての説明
+    - 今のRubyは、`String#<<`などでオブジェクトの大きさが増えたときは、VWAから元のヒープ管理にフォールバックしている
+    - GC時のtwo fingerアルゴリズムを少し変えるのと、VWAヒープ間に(データ構造の)スタック(ヒープだったかも)を用意することで、VWAヒープ間の移動をできるようにする、という発表
+  - Packet analysis with mruby on Wireshark - dRuby as example
+    - Wiresharkのビルド時にmrubyを含めることで
+      - mrubyで書いた設定ファイルを読み込めるようになった
+      - mrubyで書いた解析処理を書けるようになった
+  - Ruby Committers vs The World
+    - `{ it }`が入るかも
+    - `Data.define, Struct.define`が入るかも
+  - Implementing Object Shapes in CRuby
+  - Hunting Production Memory Leaks with Heap Sampling
+- **Day 3**
+  - error_highlight: user-friendly error diagnostics
+    - YARVバイトコードに場所情報を入れることで、どこがエラーになったのかを出すようにする
+    - 3.2からは3.1よりも色々な文法にも対応した
+    - Rubyの文法は伏魔殿
+  - Syntax Tree
+    - Rubyパーサーを取り替えるプロジェクト
+    - Rubyの文法を扱うライブラリ(rubocop, solargraph等)もこれを使えるようにする
+    - 壮大なプロジェクト
+  - Let's collect type info during Ruby running and automaticall
+    - TracePointで型情報を集められるようにする
+  - Why is building the Ruby environment hard?
+    - mysql2がインストールできないのは、brewで入れたmysqlが使うopensslと、Rubyが使うopensslのライブラリが違うから？
+      - 最新のmysql2ではそこらへんをよしなにやってくれるらしい
+    - 色々な難しさを紹介
+  - String Meets Encoding
+    - `String#split`の高速化
+    - Cのコードを書き換えて高速化
+    - 肝心な部分を聞き逃した...
+  - Ruby programming with types in action
+    - RBSで、関数に`self`(レシーバー)の型を書けるようになる?
+      - `#sort`のselfの要素は比較可能であれ、みたいなのが書ける?
+    - `# @type hoge: Integer`以外の注釈が紹介されていたけれど忘れた...
+    - 色々なデモ
+  - Stories from developing YJIT
+    - 難しかった...
