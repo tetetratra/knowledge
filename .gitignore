@@ -1,0 +1,7 @@
+# 原文・認証情報・作業途中のデータは保存しない。
+work/
+raw/
+.env
+.env.*
+__pycache__/
+.DS_Store
