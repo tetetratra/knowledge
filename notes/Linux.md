@@ -262,15 +262,15 @@ tags: "{i}\", システムコール, プロセス, ファイルシステム, Lin
 | mtime=2022-11-21 11:35:02.711715152 +0900 (1668998102), |  |
 | ctime=2022-11-21 11:35:02.711715152 +0900 (1668998102)> |  |
 | code:man 2 stat |  |
-|  S_IFMT 0170000           /* type of file */ |  |
-|         S_IFIFO  0010000  /* named pipe (fifo) */ |  |
-|         S_IFCHR  0020000  /* character special */ |  |
-|         S_IFDIR  0040000  /* directory */ |  |
-|         S_IFBLK  0060000  /* block special */ |  |
-|         S_IFREG  0100000  /* regular */ |  |
-|         S_IFLNK  0120000  /* symbolic link */ |  |
-|         S_IFSOCK 0140000  /* socket */ |  |
-|         S_IFWHT  0160000  /* whiteout */ |  |
+| `#define S_IFMT 0170000           /* type of file */` |  |
+| `#define S_IFIFO  0010000  /* named pipe (fifo) */` |  |
+| `#define S_IFCHR  0020000  /* character special */` |  |
+| `#define S_IFDIR  0040000  /* directory */` |  |
+| `#define S_IFBLK  0060000  /* block special */` |  |
+| `#define S_IFREG  0100000  /* regular */` |  |
+| `#define S_IFLNK  0120000  /* symbolic link */` |  |
+| `#define S_IFSOCK 0140000  /* socket */` |  |
+| `#define S_IFWHT  0160000  /* whiteout */` |  |
 | [システムの負荷の原因を切り分ける方法 - Qiita](https://qiita.com/k0kubun/items/8ab1dfa7c0359d8e618d) |  |
 | LVMスナップショットによるバックアップと別ホストへのリストア |  |
 | https://rooter.jp/infra-ops/lvm-snapshot-backup-restore-to-another-host/ |  |
