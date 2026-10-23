@@ -32,9 +32,25 @@ def validate(root):
         body = parts[2].strip()
         if not body.startswith('# '):
             errors.append(f'{label}: 記事タイトルがない')
-        if re.search(r'<img\b', body, re.I):
+        prose, fence = [], None
+        for line in body.splitlines():
+            match = re.match(r'^\s*(`{3,}|~{3,})(.*)$', line)
+            if fence:
+                if match and match[1][0] == fence[0] and len(match[1]) >= len(fence) and not match[2].strip():
+                    fence = None
+                continue
+            if match:
+                fence = match[1]
+                continue
+            prose.append(re.sub(r'`+[^`]*`+', '', line))
+        if fence:
+            errors.append(f'{label}: コードフェンスが閉じていない')
+        visible = '\n'.join(prose)
+        if len(re.findall(r'^# ', visible, re.M)) != 1:
+            errors.append(f'{label}: 記事タイトルの個数が不正')
+        if re.search(r'<img\b', visible, re.I):
             errors.append(f'{label}: HTML画像タグを確認する必要がある')
-        for target in re.findall(r'!\[[^\]]*\]\(([^)]+)\)', body):
+        for target in re.findall(r'!\[[^\]]*\]\(([^)]+)\)', visible):
             if not re.fullmatch(r'\.\./assets/[a-f0-9]{64}\.[a-z0-9]+', target):
                 errors.append(f'{label}: 画像はassetsの物理ファイルを相対参照する')
                 continue
