@@ -1,0 +1,101 @@
+---
+tags: "Ruby, Ruby on Rails, パフォーマンス, ベンチマーク, レスポンスタイム, キャッシュヒット率, 20861:, 11981, リクエストキュー時間, AWS ALB"
+---
+
+# Ruby on Railsパフォーマンスアポクリファ
+
+- Ruby on Rails
+- https://nateberk.gumroad.com/l/apocrypha_ja
+  - 第1章 原則
+    - 1.1  私が大切にしていること
+    - 1.2  パフォーマンスの科学
+    - 1.3  なぜパフォーマンスか?
+    - 1.4  あなたはコンパイラではない
+    - 1.5  10%の高速化が本当に意味すること
+    - 1.6  Rails アプリケーション向けのベンチマーク
+      - 下記目安を目指したい
+        - レスポンスタイム
+          - **平均で 300 ミリ秒以下**、95 パーセンタイルでは 1 秒以下であるべき
+            - 全部の平均で見てしまうと、画像やらJSONのレスポンスやらも計算に含まれてしまって小さい値が出てしまう。主要なControllerのレスポンスの時間を見るのが大事。
+        - メモリ
+          - 1 プロセスあたり 1GB 以下
+        - キャッシュヒット率
+          - (データベースや Memcache など) ヒット率 95% 以上
+          - railsだと [Rails のキャッシュ機構 - Railsガイド](https://railsguides.jp/caching_with_rails.html)
+        - DB のクエリー速度
+          - 10ms以下
+        - メモリ内部
+          - > Ruby アプリケーションで 1 トランザクションに割り当てられるオ ブジェクト数は 75,000 以下であるべきです。ガベージコレクション は 100 トランザクションあたり 20 回以下、メジャー GC は 100 ト ランザクションあたり 3 回以下であるべきです。ヒープサイズは 150 万オブジェクト以下であるべきです。
+          - > これより大きい数値は、通常、 N+1 や Active Record が一度に多くの行を検索する問題があること を示しています。
+    - 1.7  自分用のAPMを作る
+    - 1.8  フレームグラフを読む
+    - 1.9  DRM(データベース、Ruby、メモリ)
+    - 1.10 デザイン空間におけるパフォーマンス
+    - 1.11 マイクロサービスとトレンド
+    - 1.12 Minitestについて
+    - 1.13 Rubyに対する企業のサポート
+    - 1.14 なぜRubyは遅いのか?
+    - 1.15 人気
+    - 1.16 臭い依存関係
+    - 1.17 なぜキャッシュするのか?
+      - [Active Support Instrumentation で計測 - Railsガイド](https://railsguides.jp/active_support_instrumentation.html) でクエリのキャッシュ率は計測できる(かも)
+    - 1.18 スタートアップにおけるソフトウェア品質
+  - 第2章 フロントエンド
+    - 2.1  簡単なフロントエンドの設定変更
+      - 米国ではユーザーの通信速度は12Mbpsくらいが目安
+        - 1.5MBくらいでないと1秒以内に表示が完了しない
+    - 2.2  常にCDNを使用する
+    - 2.3  ページ容量とフロントエンドの読み込み時間
+    - 2.4  遅延読み込みを簡単に
+      - 画像はあとでロードする
+    - 2.5  リソース優先順位付けとは何か
+    - 2.6  HTML ON THE WIRE
+      - turbolinksやらhotwireやらを使おう
+  - 第3章 Ruby
+    - 3.1  例外:静かでもタダではない
+    - 3.2  スレッドセーフについて
+    - 3.3  GVLとは
+    - 3.4  GVLを時分割する
+      - OSスレッドはOSがタイムスライシングしている
+      - Ruby VMは、`TIME_QUANT UM_MSEC`時間ごとにGVLの開放をしている
+      - (輪読会にて) datadogのapmとかで、基本20msで終わるapiであっても運悪く`TIME_QUANT UM_MSEC`に重なって遅くなるケースはある？→ ある
+        - [Feature  Add an environment variable for tuning the default thread quantum - Ruby master - Ruby Issue Tracking System](https://bugs.ruby-lang.org/issues/20861) で議論されている
+          - PRは [Add an environment variable for controlling the default Thread quantum by tenderlove · Pull Request  · ruby/ruby](https://github.com/ruby/ruby/pull/11981/files)
+    - 3.5  GVLとC
+      - (Rubyの)C関数は、Rubyコードと違って、C関数内で自分でGVLを開放する必要がある
+        - 開放しなかったらそのC関数の処理中はずっとGVLを保持する
+    - 3.6  肥大化
+      - メモリリークと肥大化は別
+      - メモリリーク：線形にメモリ消費が増えてしまう場合
+      - 肥大化：対数的に増えている場合
+        - ガツッとメモリを確保したとき、それをOSに返すことはあまりないので、必要以上にメモリを確保するべきではない
+    - 3.7  最低限必要なRails
+      - `require 'rails/all'`をやめよう
+    - 3.8  誰も使わなかった奇妙な設定
+      - `warn_on_records_fetched_greater_than`
+        - >これに整数に設定すると、ActiveRecord::Relation オブジェクトがそ の整数より大きな結果セットを返した場合に、ログに警告を出力します
+    - 3.9  オブジェクト割り当て
+    - 3.10  常に本番用プロファイラを使用する
+    - 3.11  ローカル環境で問題を再現する
+    - 3.12  ワーカーキラー
+    - 3.13  クエリーキャッシュとは?
+    - 3.14  NewRelicのRubyVMタブを読む
+    - 3.15 テストセットアップ
+  - 第4章 スケール
+    - 4.1  消費時間とは
+    - 4.2  リクエストキュー時間
+      - サービス(= サーバー)が動いている時間ではなく、サーバーに到達するまでの時間のこと
+      - サーバーに到達する前に各種queueに入っている間の時間のこと
+      - そのままだと計測できないので、前段で`X-Request-Start`のようなヘッダを付けて、サーバー直前で現在時刻との差を計算してdatadog等に送る必要がある
+        - AWS ALBだと`X-Amzn-Trace-Id`ヘッダーというものが追加されているので、これを使う
+          - [Application Load Balancer のリクエストをトレースする - エラスティックロードバランシング](https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/application/load-balancer-request-tracing.html)
+    - 4.3  アムダールの法則
+    - 4.4  スレッド数
+    - 4.5  CPU律速かIO律速か?
+    - 4.6  スワップとは何か
+    - 4.7  データベースプール
+    - 4.8  シングルスレッド性能
+    - 4.9  リードレプリカ
+    - 4.10  なぜLambdaなのか?
+    - 4.11  Performance-Mは決して使わない
+    - 4.12  日次での再起動
