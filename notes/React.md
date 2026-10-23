@@ -1,0 +1,57 @@
+---
+tags: ""
+---
+
+# React
+
+- [Getting Started – React](https://ja.reactjs.org/docs/getting-started.html)
+- [正真正銘のReactだけの不純物なしでReact入門](https://sbfl.net/blog/2019/02/20/react-only-tutorial/)
+- hook
+  - [最近Reactを始めた人向けのReact Hooks入門](https://sbfl.net/blog/2019/11/12/react-hooks-introduction/)
+  - useState
+    - 状態を持つ用
+  - useMemo
+    - メモ化
+  - useCallback
+    - 関数のメモ化
+    - 関数コンポーネント内でコールバック関数を作るとき、毎回新規に関数を作ってそれをonClickとかに設定してしまうと、更新が起きたと判定されて毎回レンダリングが起きてしまう。なのでuseCallbackで同じ関数を使い回す
+  - useRef
+    - DOMへの参照
+    - useRefで作った参照を、JSXのrefプロパティにわたす
+- [Redux Form - Getting Started](https://redux-form.com/8.3.0/docs/gettingstarted.md/)
+- [Redux Form入門 - Qiita](https://qiita.com/yhosok/items/ab8e990403749690d846)
+- `children`propsでhtmlの子要素を受け取れる
+  - [コンポジション vs 継承 – React](https://ja.reactjs.org/docs/composition-vs-inheritance.html)
+- プロパティのデフォルト値は true
+  - >プロパティに値を与えない場合、デフォルトの値は true となります
+- useEffect
+  - 毎回のレンダー後に呼ばれる
+  - データをfetchしたり
+  - 第2引数を空配列にすれば、最初にだけ呼ばれる
+    - >もしも副作用とそのクリーンアップを 1 度だけ（マウント時とアンマウント時にのみ）実行したいという場合、空の配列 ([]) を第 2 引数として渡すことができます。こうすることで、あなたの副作用は props や state の値のいずれにも依存していないため再実行する必要が一切ない、ということを React に伝えることができます。
+- [Reactはどうやって関数からクラスを見分けるているの？ — Overreacted](https://overreacted.io/ja/how-does-react-tell-a-class-from-a-function/)
+- クラスコンポーネントのインスタンス化は1度だから、クラスのフィールドにprops依存の値を設定しても、propsの変化時にその値は変わってくれない。(propsの変化で再実行されるのはrender())
+  - 関数化すればrenderごとになる
+- classNameに複数の値を指定するのを楽にするライブラリ
+  - https://www.npmjs.com/package/classnames
+- `<Person {...{ name, age }}>`のようにすれば キー=値 でpropsを書ける
+- react-router
+  - hookがある
+    - `useHistory, useLocation, useParams`
+    - https://reactrouter.com/web/api/Hooks
+- [react-onclickoutside - npm](https://www.npmjs.com/package/react-onclickoutside)
+  - コンポーネント範囲外のクリックを制御
+  - モーダル的なやつにつかう
+- keyにindexを指定するのは避けたほうがいい
+  - [Index as a key is an anti-pattern (React) | by Robin Pokorny | Medium](https://robinpokorny.medium.com/index-as-a-key-is-an-anti-pattern-e0349aece318)
+  - のちに配列の先頭にアイテムを追加するとき、その追加したアイテムのindexが0となるので、追加前の1番目と取り違えが起きてしまう
+- [イベントプーリング – React](https://ja.reactjs.org/docs/legacy-event-pooling.html)
+  - >SyntheticEvent オブジェクトはプールされます。つまり SyntheticEvent はイベントハンドラが呼び出された後に再利用され、すべてのプロパティが null にセットされます。
+  - イベント関数内でsetTimeoutにeventを渡すことはできない
+    - イベント関数が終わったら捨てられてしまうから？
+  - (react16までの問題)
+- 要素の外側クリック検知の実装
+  - hoverしているコンポーネントの非表示などに
+  - useEffectで`document.addEventListener`で`click`を登録
+    - `removeEventListener`をreturn
+    - クリックされたとき、それがコンポーネントのrefでなければ、そのクリックは外側のクリックということ
