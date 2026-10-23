@@ -8,7 +8,8 @@
     "分割先記事": 138,
     "最終Markdown記事": 573,
     "保存画像": 206,
-    "push実行": false
+    "push実行": true,
+    "push先": "https://github.com/tetetratra/knowledge"
   },
   "pages": [
     {
