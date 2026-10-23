@@ -1,0 +1,46 @@
+---
+tags: "プログラミング言語, オートボクシング"
+---
+
+# Java: ラムダ式とStream API
+
+- 公式リファレンス: https://docs.oracle.com/javase/jp/8/docs/api/
+  - java8(1.8)用かも
+  - 8からラムダ式が入っているっぽい
+- icons/hr.icon
+- **Javaメモ**
+- **ラムダ系**
+  - 引数の型も返り値の型も推論してくれる
+  - `( 引数 ) -> { 処理; };`だけどわかる所は色々省略できる
+  - [Java のラムダ式と StreamAPI。入門レベルを図解で | コード７区](http://ailaby.com/java_lambda/)
+  - 関数インターフェースとは
+    - インターフェースに抽象メソッドを1つだけ定義したもの
+  - filterとかでinterfaceをnewしたものを渡しているようにみえるのは、そうじゃなくて、そのinterfaceを実装した無名クラスをnewしているだけ
+    - で、最近のjavaだとそれをラムダ式で書ける
+    - 関数インタフェースを受ける場所でラムダ式が使用可能
+    - ラムダ式を受け取るメソッドの引数の変数の型はわかっている。そしてその型は関数インターフェース。なのでメソッドも確定できる。なので引数と返り値の型も確定できる。なのでラムダ式には型を書かなくて良い。
+  - filter に渡す引数は Predicate という関数型インターフェース(の無名クラスのインスタンス)と決まっている
+  - streamにも色々型があって、汎用の`Stream<T>`や固有の`IntStream`とかがある
+    - 固有の方はsumメソッドとかが使える
+    - mapToIntというメソッドで変換する。これにも関数インターフェースをわたす(ToIntFunctionインターフェース)
+  - filter実装する側の立場になると、、、
+    - Predicateインターフェースを定義しておく。testメソッドを実装するように指定しておく。
+    - filterの引数の型を、Predicateインターフェースを実装したクラスに指定する
+    - 引数のクラスのtestメソッド(Predicateインターフェースのクラスなので絶対実装されている)で、各要素を判定する。
+  - `collect(Collectors.toList())`で、streamをListに戻せる
+  - forEachは、Consumer関数インターフェースと決まっている。
+  - 関数型インターフェースになる条件
+    - [関数型インターフェースのおさらいメモ - Qiita](https://qiita.com/rubytomato@github/items/3f6fce2323c5fc08603b)
+    - インターフェースに抽象メソッドが1つだけあるのが条件。
+  - Arrayのsortについて
+    - [Arrays (Java Platform SE 8 )](https://docs.oracle.com/javase/jp/8/docs/api/java/util/Arrays.html#sort-T:A-int-int-java.util.Comparator-)
+    - `public static <T> void sort(T[] a, Comparator<? super T> c)`で、Comparatorは関数型インタフェース。なのでラムダ式を代わりに使える
+    - [Comparator (Java Platform SE 8 )](https://docs.oracle.com/javase/jp/8/docs/api/java/util/Comparator.html)
+    - 抽象メソッドをみると、compareが一つだけある、、、と思いきやequalもある...? なぜ...
+      - [java.util.Comparatorは関数型インタフェース - yohhoyの日記](https://yohhoy.hatenadiary.jp/entry/20140919/p1)
+      - equalsはOjbectのオーバーライドだからあってもOKらしい
+  - ラムダ式にメソッドチェーンはできない?
+    - [Comparator (Java Platform SE 8 )](https://docs.oracle.com/javase/jp/8/docs/api/java/util/Comparator.html)のラムダに`reversed()`をしたかったけどできなかった
+  - 既存のメソッドを呼び出すだけのラムダ式では、メソッド参照という糖衣構文を使える
+  - まとまってたスライド: [Java8勉強会](https://www.slideshare.net/kentaromaeda581/java8-40752729)
+  - 並列化も簡単にできるらしい

@@ -1,0 +1,52 @@
+---
+tags: "プログラミング言語, オートボクシング"
+---
+
+# Java: コレクションとその他の機能
+
+- **コレクション系**
+  - ArrayList
+    - ベクターとか言われてそうなやつ
+  - HashMap
+    - 連想配列、辞書、ハッシュ
+  - LinkedList
+    - データ構造のList。Rubyには無いやつ
+- ソートするときのラムダの書き方について
+- [(o1, o2) -> o1 - o2 なんて呪文はもうやめて！ - Java8でのComparatorの使い方 - Qiita](https://qiita.com/tag1216/items/50ecf6a7bc10218ee889)
+- **その他**
+  - アノテーション
+    - `@`のやつ。コメント用の機能。
+  - import
+    - `import パッケージ名.クラス名;`
+  - (null OR そうでない)、を表すoptional型がある
+  - 可変長引数ができる
+  - java14からの新機能
+    - [Java 14新機能まとめ - Qiita](https://qiita.com/nowokay/items/ec85d97a7cecaaac8123)
+    - classではなくrecordが作れる
+      - イミュータブル
+    - パターンマッチがある
+    - テキストブロック
+    - switchが式になった
+  - バージョンごとの新機能はこのサイトに載ってる
+    - [Java新機能メモ(Hishidama's Java up-to-date)](https://www.ne.jp/asahi/hishidama/home/tech/java/uptodate.html)
+  - java10から
+    - `var`
+      - ローカル変数の定義のときに、型名の代わりにvarを書いても推論してくれる
+  - java9から
+    - リソース付きrescue
+      - pythonのwith文のようなものかも
+- **デザインパターン**
+- **Observerパターン**
+  - `Observable`クラス
+    - 監視される側が継承する
+    - `addObserver(Observer o)`
+      - observerを登録する
+      - observer側からこのメソッドを呼び出す書き方が主流
+    - `setChanged()`
+      - 状態が変化したというフラグを立てる
+    - `notifyObservers()`
+      - 状態が変化したというフラグが立っていたら，全observerのupdateメソッドを呼び出す
+  - `Observer`インターフェース
+    - 監視する側が実装する
+    - `update(Observable o, Object arg)`
+      - Observableの状態が変化すると呼び出される
