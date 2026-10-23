@@ -2,12 +2,12 @@
   "summary": {
     "対象元ページ": 461,
     "除外プロフィールページ": 1,
-    "移行済み元ページ": 458,
-    "保留元ページ": 3,
-    "分割した元ページ": 24,
-    "分割先記事": 130,
-    "最終Markdown記事": 564,
-    "保存画像": 183,
+    "移行済み元ページ": 461,
+    "保留元ページ": 0,
+    "分割した元ページ": 26,
+    "分割先記事": 138,
+    "最終Markdown記事": 573,
+    "保存画像": 206,
     "push実行": false
   },
   "pages": [
@@ -341,9 +341,13 @@
     },
     {
       "source_page_id": "67109af31535ea001d547d5c",
-      "status": "保留",
-      "title": "トランザクション分離レベル",
-      "reason": "Gyazo画像をログイン済みブラウザでも取得できないため、元画像の提供または画像省略の判断が必要"
+      "status": "移行済み",
+      "import_commit": "74797e9",
+      "files": [
+        "notes/トランザクション分離レベル.md"
+      ],
+      "omitted_images": 1,
+      "omission_reason": "取得不可の画像1点をユーザー承認に基づき省略"
     },
     {
       "source_page_id": "69e0a8248b0a2ae79ba93145",
@@ -1264,9 +1268,18 @@
     },
     {
       "source_page_id": "5e8dd2a42c82ba001793f62a",
-      "status": "保留",
-      "title": "データベース",
-      "reason": "画像1件が取得できず、元の内容を完全に保持できないため。"
+      "status": "移行済み",
+      "import_commit": "d045e91",
+      "files": [
+        "notes/データベースのSQLアンチパターン.md",
+        "notes/MySQLのSQL操作とクエリ改善メモ.md",
+        "notes/リレーショナルモデルと正規化.md",
+        "notes/MySQLの型・スキーマ設計と参考資料.md",
+        "notes/MySQLの実行計画・ロックと運用.md"
+      ],
+      "split_commit": "8de97df",
+      "omitted_images": 1,
+      "omission_reason": "取得不可の画像1点をユーザー承認に基づき省略"
     },
     {
       "source_page_id": "61da6dfe852feb00224773fa",
@@ -2607,9 +2620,16 @@
     },
     {
       "source_page_id": "5e8abc0e87cd720017f2f621",
-      "status": "保留",
-      "title": "AWS",
-      "reason": "元画像の1点が未取得で、内容と個人情報の有無を確認できない"
+      "status": "移行済み",
+      "import_commit": "b357dc9",
+      "files": [
+        "notes/AWSのサービスと開発ツール.md",
+        "notes/AWS Jump Start研修メモ.md",
+        "notes/AWSのハンズオンと運用メモ.md"
+      ],
+      "split_commit": "10ddef2",
+      "omitted_images": 1,
+      "omission_reason": "取得不可の画像1点をユーザー承認に基づき省略"
     },
     {
       "source_page_id": "63e99dce977884001c6a535e",
