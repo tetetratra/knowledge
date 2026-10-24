@@ -99,3 +99,5 @@ if (form) {
   readLocation();search();
   if(location.hash==='#q') query.focus();
 }
+
+import('./trail.js' + new URL(import.meta.url).search).then(module => module.mountTrail(base)).catch(console.error);
