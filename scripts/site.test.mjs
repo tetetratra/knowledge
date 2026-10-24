@@ -15,13 +15,14 @@ test('全記事を出力し、記事・検索インデックス・生成物をGi
   assert(existsSync('dist/pagefind/pagefind.js'));
   const ignored=await readFile('.gitignore','utf8');assert(ignored.includes('dist/'));
 });
-test('全記事のローカルリンクと画像が存在し、関連記事は自身を含まず最大8件',async()=>{
+test('全記事のローカルリンクと画像が存在し、関連記事は自身を含まず最大100件',async()=>{
   for(const page of catalog){
     const html=await readFile(fileFor(page.url),'utf8');
     assert(html.includes('data-pagefind-body'));assert(!html.includes('<script>alert('));
     const related=html.split('aria-labelledby="related-title"')[1];
     const recommendations=[...related.matchAll(/class="card-link" href="([^"]+)"/g)].map(m=>m[1]);
-    assert(recommendations.length<=8);assert(!recommendations.includes(page.url));
+    const candidates=JSON.parse(await readFile(`dist/related/${page.id}.json`,'utf8'));
+    assert.equal(recommendations.length,Math.min(100,candidates.length));assert(!recommendations.includes(page.url));
     assert.equal(new Set(recommendations).size,recommendations.length);
     for(const match of html.matchAll(/(?:href|src)="([^"]+)"/g)){
       const value=match[1].replaceAll('&amp;','&');
@@ -44,6 +45,7 @@ test('一覧と初期HTMLをつながりが多い順に揃える',async()=>{
   const home=await readFile('dist/index.html','utf8');
   const first=home.match(/class="card-link" href="([^"]+)"/)[1];
   assert.equal(first,catalog[0].url);
+  assert.equal([...home.matchAll(/class="card-link"/g)].length,Math.min(100,catalog.length));
 });
 
 test('タグは同名の実記事を優先し、未作成なら本文が空のページへ移動する',async()=>{

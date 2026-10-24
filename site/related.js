@@ -13,7 +13,7 @@ export async function mountRelated(base, version) {
   const more = section.querySelector('[data-related-more]');
   const status = section.querySelector('[data-related-status]');
   const esc = value => String(value).replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
-  let data, shown = 8, generation = 0;
+  let data, shown = 100, generation = 0;
   const load = async file => {
     const response = await fetch(base + file, {cache:'no-cache'});
     if (!response.ok) throw new Error('関連記事を取得できません');
@@ -51,8 +51,8 @@ export async function mountRelated(base, version) {
       console.error(error);
     } finally {if (request === generation) more.disabled = false;}
   }
-  select.addEventListener('change',()=>{shown=8;render();});
-  more.addEventListener('click',()=>{shown+=8;render();});
+  select.addEventListener('change',()=>{shown=100;render();});
+  more.addEventListener('click',()=>{shown+=100;render();});
   select.disabled = false;
   more.disabled = false;
 }

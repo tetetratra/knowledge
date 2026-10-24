@@ -52,7 +52,7 @@ if (form) {
     try {
       const tags = await tagPagesPromise;
       if (version !== generation) return;
-      const slice = active.slice(shown,shown+30);
+      const slice = active.slice(shown,shown+100);
       results.insertAdjacentHTML('beforeend',cards(slice,tags)); shown += slice.length;
       more.hidden = shown >= active.length;
     } finally { if (version === generation) more.disabled = false; }
