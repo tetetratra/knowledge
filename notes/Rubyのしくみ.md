@@ -1,5 +1,5 @@
 ---
-tags: "本, Ruby, MRI, Bison, LALR, YARV, $ \\sube"
+tags: "本, Ruby, MRI, Bison, LALR, YARV"
 ---
 
 # Rubyのしくみ

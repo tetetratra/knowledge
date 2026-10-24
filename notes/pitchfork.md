@@ -1,5 +1,5 @@
 ---
-tags: "unicorn, refork, fork, _** 一定数のリクエストを処理したworkerプロセスがmoldプロセスになる, 35370"
+tags: "unicorn, refork, fork"
 ---
 
 # pitchfork

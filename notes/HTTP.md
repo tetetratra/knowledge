@@ -1,5 +1,5 @@
 ---
-tags: "', CSRF, json, PRGパターン, Websocket, Server-sent events, SPDY, QUIC, Public Suffix List, PSL, TLD, eTLD"
+tags: "CSRF, json, PRGパターン, Websocket, Server-sent events, SPDY, QUIC, Public Suffix List, PSL, TLD, eTLD"
 ---
 
 # HTTP

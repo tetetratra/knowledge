@@ -1,5 +1,5 @@
 ---
-tags: "RubyKaigi_2022, Ruby, MaNy, スレッド, 並列処理, 並行処理, Ractor, Thread, 5, goroutine, Erlang, tokio, GVL"
+tags: "RubyKaigi_2022, Ruby, MaNy, スレッド, 並列処理, 並行処理, Ractor, Thread, goroutine, Erlang, tokio, GVL"
 ---
 
 # Making MaNy threads on Ruby

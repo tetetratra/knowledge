@@ -1,5 +1,5 @@
 ---
-tags: "ラムダ計算, 継続, call/cc, β簡約, δ簡約, Church-Rosserの定理, $ \\lambda_v, redex"
+tags: "ラムダ計算, 継続, call/cc, β簡約, δ簡約, Church-Rosserの定理, redex"
 ---
 
 # An Introduction to Continuations

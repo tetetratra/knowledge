@@ -1,5 +1,5 @@
 ---
-tags: "{i}\", システムコール, プロセス, ファイルシステム, Linux, FUSE, LXC, ACL, <File::Stat, define"
+tags: "システムコール, プロセス, ファイルシステム, Linux, FUSE, LXC, ACL, File::Stat, define"
 ---
 
 # Linux: シグナルとファイル入出力

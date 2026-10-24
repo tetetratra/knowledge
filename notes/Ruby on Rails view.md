@@ -1,5 +1,5 @@
 ---
-tags: "Ruby on Rails, Rails, Yarn, Webpacker, Sprockets, 45602, sass-rails"
+tags: "Ruby on Rails, Rails, Yarn, Webpacker, Sprockets, sass-rails"
 ---
 
 # Ruby on Rails view

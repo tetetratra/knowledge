@@ -1,5 +1,5 @@
 ---
-tags: "gradual typing, TypeScript, 漸進的型付け, gradual guarantee, 静的型付け, 動的型付け, Typecase, パターンマッチ, Object-Oriented Languages, Soft Typing, Type Hints, 型ヒント, Types for Dynamic Languages, $ T_1 と T_2, $ T_1 \\sim T_2, $ \\star, OOPL, $ f: T \\Rightarrow^l T, $ v : T_1 \\rightarrow T_2 \\Rightarrow^l T_3 \\rightarrow T_4, $ v : G \\Rightarrow \\star, $  \\star \\Rightarrow G, $ \\vdash_s, \\Downarrow_S, $ \\lceil \\cdot \\rceil, $ \\Downarrow_D, $ e \\Uparrow"
+tags: "gradual typing, TypeScript, 漸進的型付け, gradual guarantee, 静的型付け, 動的型付け, Typecase, パターンマッチ, Object-Oriented Languages, Soft Typing, Type Hints, 型ヒント, Types for Dynamic Languages, OOPL"
 ---
 
 # Refined Criteria for Gradual Typing
