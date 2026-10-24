@@ -82,3 +82,12 @@ test('実記事と空ページの関連候補が有効で、空のRubyページ�
   assert(html.includes('id="related-sort"'));
   assert(html.includes('class="card-link"'));
 });
+
+test('トップ・記事・空ページ・404を含む全HTMLに検索掲載を拒否する指定がある',async()=>{
+  const files=(await readdir('dist',{recursive:true})).filter(file=>file.endsWith('.html'));
+  assert(files.length>catalog.length);
+  for(const file of files){
+    const html=await readFile(path.join('dist',file),'utf8');
+    assert.match(html,/<meta name="robots" content="noindex, noimageindex">/,file);
+  }
+});
