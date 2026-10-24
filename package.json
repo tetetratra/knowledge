@@ -1,0 +1,18 @@
+{
+  "name": "knowledge",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs && pagefind --site dist",
+    "test": "node --test scripts/*.test.mjs",
+    "preview": "python3 -m http.server 4173 --directory dist"
+  },
+  "dependencies": {
+    "highlight.js": "11.12.0",
+    "markdown-it": "15.0.3",
+    "pagefind": "1.5.2"
+  }
+}
