@@ -8,7 +8,7 @@ import { noteUpdateTimes } from './note-dates.mjs';
 import { normalizeTitle } from '../site/knowledge.js';
 
 const start = performance.now();
-const siteVersion = createHash('sha256').update(await readFile('site/app.js')).update(await readFile('site/site.css')).update(await readFile('site/trail.js')).update(await readFile('site/knowledge.js')).digest('hex').slice(0, 12);
+const siteVersion = createHash('sha256').update(await readFile('site/app.js')).update(await readFile('site/site.css')).update(await readFile('site/trail.js')).update(await readFile('site/knowledge.js')).update(await readFile('site/related.js')).digest('hex').slice(0, 12);
 const base = (process.env.BASE_PATH || '/').replace(/\/$/, '') + '/';
 if (!/^\/(?:[a-zA-Z0-9_-]+\/)*$/.test(base)) throw new Error('BASE_PATHが不正');
 const esc = s => String(s).replace(/[&<>"']/g, x => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[x]));
@@ -82,29 +82,39 @@ function shell(title, content, article = false) {
 }
 await rm('dist', { recursive: true, force: true });
 await mkdir('dist/notes', { recursive: true });
+await mkdir('dist/related', { recursive: true });
 await cp('assets','dist/assets', { recursive: true });
 await cp('site','dist', { recursive: true });
 await cp('node_modules/highlight.js/styles/github.css','dist/code.css');
 const relationStart = performance.now();
-const related = relatedPages(pages);
+const queries = [...pages, ...Array.from(emptyPages.values(), page => ({...page, text:'', tags:[page.title], isTag:true}))];
+const allRelated = relatedPages(pages, pages.length, queries);
+const relatedById = new Map(queries.map((page, i) => [page.id, allRelated[i]]));
+// 一覧のつながり数は従来どおり、実記事の上位8件から数える。
+const related = allRelated.slice(0, pages.length).map(links => links.slice(0, 8));
 const connections = connectionCounts(pages, related);
 for (const page of pages) page.connections = connections.get(page.id);
 const relationSeconds = (performance.now() - relationStart) / 1000;
 const byId = new Map(pages.map(p => [p.id,p]));
-for (const [index,page] of pages.entries()) {
+function relatedSection(page) {
+  const links = relatedById.get(page.id);
+  const cards = links.slice(0,8).map(link => card(byId.get(link.id),link.sharedTags)).join('');
+  return `<section class="related" data-related-id="${page.id}" aria-labelledby="related-title"><div class="section-heading"><h2 id="related-title">関連するノート</h2><div class="catalog-controls"><label class="sr-only" for="related-sort">関連記事の並び順</label><select id="related-sort"><option value="relevance">関連度が高い順</option><option value="updated">更新が新しい順</option></select></div></div><p data-related-status class="search-status" role="status" hidden></p><div class="note-grid related-grid" data-related-results>${cards || '<p class="muted">関連するノートはまだありません。</p>'}</div><button type="button" class="more-button" data-related-more${links.length <= 8 ? ' hidden' : ''}>もっと見る</button></section>`;
+}
+for (const page of queries) await writeFile(`dist/related/${page.id}.json`, JSON.stringify(relatedById.get(page.id)));
+for (const page of pages) {
   headingCount = 0;
   const rendered = md.render(page.body);
   const allTags = page.tags.slice(0,12).map(t => chip(t)).join(' ');
   const restTags = page.tags.length > 12 ? `<details class="more-tags"><summary data-pagefind-ignore>ほか${page.tags.length - 12}タグ</summary><div class="article-tags">${page.tags.slice(12).map(t => chip(t)).join(' ')}</div></details>` : '';
-  const relatedCards = related[index].map(r => card(byId.get(r.id),r.sharedTags)).join('');
-  const content = `<main id="main" class="article-main"><nav class="breadcrumb" aria-label="パンくず"><a href="${base}">ノート一覧</a><span aria-hidden="true">/</span><span>ノート</span></nav><article class="reading" data-pagefind-body><header class="article-header"><h1 data-pagefind-meta="title">${esc(page.title)}</h1><div class="article-tags" data-pagefind-weight="2">${allTags}${restTags}</div></header><div class="prose">${rendered}</div></article><section class="related" aria-labelledby="related-title"><div class="section-heading"><div><h2 id="related-title">関連するノート</h2></div></div><div class="note-grid related-grid">${relatedCards || '<p class="muted">関連するノートはまだありません。</p>'}</div></section></main>`;
+  const content = `<main id="main" class="article-main"><nav class="breadcrumb" aria-label="パンくず"><a href="${base}">ノート一覧</a><span aria-hidden="true">/</span><span>ノート</span></nav><article class="reading" data-pagefind-body><header class="article-header"><h1 data-pagefind-meta="title">${esc(page.title)}</h1><div class="article-tags" data-pagefind-weight="2">${allTags}${restTags}</div></header><div class="prose">${rendered}</div></article>${relatedSection(page)}</main>`;
   const directory = `dist/notes/${page.id}`; await mkdir(directory);
   await writeFile(`${directory}/index.html`, shell(page.title, content, true));
 }
 for (const page of emptyPages.values()) {
   const directory = `dist/notes/${page.id}`;
   await mkdir(directory);
-  const content = `<main id="main" class="article-main"><nav class="breadcrumb" aria-label="パンくず"><a href="${base}">ノート一覧</a></nav><article class="reading" data-empty-page><header class="article-header"><h1>${esc(page.title)}</h1></header><div class="prose"></div></article></main>`;
+  const content = `<main id="main" class="article-main"><nav class="breadcrumb" aria-label="パンくず"><a href="${base}">ノート一覧</a></nav><article class="reading" data-empty-page><header class="article-header"><h1>${esc(page.title)}</h1></header><div class="prose"></div></article>${relatedSection(page)}</main>`;
   await writeFile(`${directory}/index.html`, shell(page.title, content, true));
 }
 await writeFile('dist/tag-pages.json', JSON.stringify(tagPages));

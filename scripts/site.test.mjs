@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, stat } from 'node:fs/promises';
+import { readFile, stat, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
@@ -60,4 +60,23 @@ test('タグは同名の実記事を優先し、未作成なら本文が空の�
       assert(!html.includes('data-pagefind-body'),tag);
     }
   }
+});
+
+test('実記事と空ページの関連候補が有効で、空のRubyページにも関連記事がある',async()=>{
+  const ids=new Set(catalog.map(page=>page.id));
+  for(const file of await readdir('dist/related')){
+    const links=JSON.parse(await readFile('dist/related/'+file,'utf8'));
+    assert.equal(new Set(links.map(link=>link.id)).size,links.length);
+    for(const link of links){
+      assert(ids.has(link.id));assert.notEqual(link.id,file.replace('.json',''));
+      assert(Number.isFinite(link.score));
+    }
+  }
+  const tags=JSON.parse(await readFile('dist/tag-pages.json','utf8'));
+  const id=tags.ruby.split('/').filter(Boolean).at(-1);
+  const links=JSON.parse(await readFile('dist/related/'+id+'.json','utf8'));
+  assert(links.length>0);
+  const html=await readFile(fileFor(tags.ruby),'utf8');
+  assert(html.includes('id="related-sort"'));
+  assert(html.includes('class="card-link"'));
 });

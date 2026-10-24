@@ -113,3 +113,4 @@ if (form) {
 }
 
 import('./trail.js' + version).then(module => module.mountTrail(base)).catch(console.error);
+import('./related.js' + version).then(module => module.mountRelated(base,version)).catch(console.error);

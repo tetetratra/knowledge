@@ -31,3 +31,14 @@ test('つながりは双方向の相手ページ数で数え、相互リンク�
   const links=[[{id:'b'},{id:'b'}],[{id:'a'}],[{id:'a'}],[]];
   assert.deepEqual(Array.from(connectionCounts(pages,links).values()),[2,1,1,0]);
 });
+
+test('未作成タグを同じ文書空間で評価し、空の本文でもタグ付き記事を返す',()=>{
+  const pages=[
+    {id:'ruby-note',title:'オブジェクトを調べる',text:'ObjectSpaceによるメモリの計測',tags:['Ruby']},
+    {id:'other',title:'配色',text:'画面の配色を調整する',tags:['デザイン']},
+  ];
+  const query={id:'virtual-ruby',title:'Ruby',text:'',tags:['Ruby'],isTag:true};
+  const result=relatedPages(pages,10,[query]);
+  assert.equal(result[0][0].id,'ruby-note');
+  assert(!result[0].some(link=>link.id==='other'));
+});
