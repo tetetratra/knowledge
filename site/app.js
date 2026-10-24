@@ -44,7 +44,7 @@ if (form) {
         return { ...article, snippet: result.excerpt };
       }));
       if (version !== generation) return;
-      const html = data.map(item => `<article class="note-card"><a class="card-link" href="${esc(item.url)}"><h3>${esc(item.title)}</h3><p>${item.snippet || ''}</p></a><div class="card-tags">${item.tags.slice(0,3).map(t=>`<a class="tag" href="${base}?q=${encodeURIComponent(t)}#q">${esc(t)}</a>`).join('')}</div></article>`).join('');
+      const html = data.map(item => `<article class="note-card"><a class="card-link" href="${esc(item.url)}"><h3>${esc(item.title)}</h3><p>${item.snippet || ''}</p></a><div class="card-tags">${item.tags.slice(0,3).map(t=>`<a class="tag" href="${base}?q=${encodeURIComponent(t)}">${esc(t)}</a>`).join('')}</div></article>`).join('');
       results.insertAdjacentHTML('beforeend',html); shown += data.length;
       more.hidden = shown >= active.length;
     } finally { if (version === generation) more.disabled = false; }
@@ -85,7 +85,7 @@ if (form) {
     clearTimeout(timer);
     query.value = url.searchParams.get('q');
     syncLocation(true);
-    query.focus();
+    query.blur();
     search();
   });
   window.addEventListener('popstate',()=>{readLocation();search();});
