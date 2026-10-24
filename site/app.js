@@ -22,10 +22,10 @@ if (form) {
     return pagefindPromise;
   }
   query.addEventListener('focus', () => { pagefind().catch(() => {}); });
-  function syncLocation() {
+  function syncLocation(push = false) {
     const url = new URL(location.href);
     url.search = ''; if (query.value.trim()) url.searchParams.set('q',query.value.trim());
-    history.replaceState({},'',url);
+    history[push ? 'pushState' : 'replaceState']({},'',url);
   }
   function readLocation() {
     const params = new URLSearchParams(location.search); query.value = params.get('q') || '';
@@ -44,7 +44,7 @@ if (form) {
         return { ...article, snippet: result.excerpt };
       }));
       if (version !== generation) return;
-      const html = data.map(item => `<article class="note-card"><a class="card-link" href="${esc(item.url)}"><h3>${esc(item.title)}</h3><p>${item.snippet || ''}</p></a><div class="card-tags">${item.tags.slice(0,3).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div></article>`).join('');
+      const html = data.map(item => `<article class="note-card"><a class="card-link" href="${esc(item.url)}"><h3>${esc(item.title)}</h3><p>${item.snippet || ''}</p></a><div class="card-tags">${item.tags.slice(0,3).map(t=>`<a class="tag" href="${base}?q=${encodeURIComponent(t)}#q">${esc(t)}</a>`).join('')}</div></article>`).join('');
       results.insertAdjacentHTML('beforeend',html); shown += data.length;
       more.hidden = shown >= active.length;
     } finally { if (version === generation) more.disabled = false; }
@@ -76,6 +76,18 @@ if (form) {
   form.addEventListener('submit',event=>{event.preventDefault();clearTimeout(timer);syncLocation();search();});
   query.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>{syncLocation();search();},220);});
   more.addEventListener('click',()=>showMore(generation).catch(error=>{status.textContent='続きを読み込めませんでした。再度お試しください。';console.error(error);}));
+  document.addEventListener('click', event => {
+    const link = event.target.closest('a.tag');
+    if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const url = new URL(link.href);
+    if (url.origin !== location.origin || url.pathname !== base || !url.searchParams.has('q')) return;
+    event.preventDefault();
+    clearTimeout(timer);
+    query.value = url.searchParams.get('q');
+    syncLocation(true);
+    query.focus();
+    search();
+  });
   window.addEventListener('popstate',()=>{readLocation();search();});
   readLocation();search();
   if(location.hash==='#q') query.focus();

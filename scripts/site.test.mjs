@@ -34,3 +34,13 @@ test('全記事のローカルリンクと画像が存在し、関連記事は�
     }
   }
 });
+
+test('一覧と初期HTMLの先頭をGitの最終更新が新しい順に揃える',async()=>{
+  for(let i=0;i<catalog.length;i++){
+    assert(Number.isFinite(catalog[i].updatedAt) && catalog[i].updatedAt>0);
+    if(i)assert(catalog[i-1].updatedAt>=catalog[i].updatedAt);
+  }
+  const home=await readFile('dist/index.html','utf8');
+  const first=home.match(/class="card-link" href="([^"]+)"/)[1];
+  assert.equal(first,catalog[0].url);
+});
