@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js';
-import { relatedPages } from './related.mjs';
+import { relatedPages, connectionCounts } from './related.mjs';
 import { noteUpdateTimes } from './note-dates.mjs';
 
 const start = performance.now();
@@ -70,6 +70,8 @@ await cp('site','dist', { recursive: true });
 await cp('node_modules/highlight.js/styles/github.css','dist/code.css');
 const relationStart = performance.now();
 const related = relatedPages(pages);
+const connections = connectionCounts(pages, related);
+for (const page of pages) page.connections = connections.get(page.id);
 const relationSeconds = (performance.now() - relationStart) / 1000;
 const byId = new Map(pages.map(p => [p.id,p]));
 for (const [index,page] of pages.entries()) {
@@ -82,9 +84,10 @@ for (const [index,page] of pages.entries()) {
   const directory = `dist/notes/${page.id}`; await mkdir(directory);
   await writeFile(`${directory}/index.html`, shell(page.title, content, true));
 }
-const content = `<main id="main" class="library-main"><section class="intro" id="top"><h1 class="sr-only">ノート検索</h1><form id="search-form" class="search-box" role="search"><span class="search-symbol" aria-hidden="true">⌕</span><label class="sr-only" for="q">タイトル・本文・タグを検索</label><input id="q" name="q" type="search" placeholder="キーワード・タグで検索" autocomplete="off"></form></section><section class="library" aria-labelledby="list-title"><div class="catalog"><div class="section-heading"><h2 id="list-title">すべてのノート</h2><span id="result-count" class="muted" role="status" aria-live="polite">${pages.length}件</span></div><p id="search-status" class="search-status" role="status" aria-live="polite"></p><div id="results" class="note-grid">${pages.slice(0,24).map(p=>card(p)).join('')}</div><button id="more" class="more-button" type="button">もっと見る</button><noscript><p>検索にはJavaScriptが必要です。</p><details><summary>すべてのノートを表示</summary><ul>${pages.map(p=>`<li><a href="${p.url}">${esc(p.title)}</a></li>`).join('')}</ul></details></noscript></div></section></main>`;
+pages.sort((a, b) => b.connections - a.connections || b.updatedAt - a.updatedAt || a.title.localeCompare(b.title, 'ja'));
+const content = `<main id="main" class="library-main"><section class="intro" id="top"><h1 class="sr-only">ノート検索</h1><form id="search-form" class="search-box" role="search"><span class="search-symbol" aria-hidden="true">⌕</span><label class="sr-only" for="q">タイトル・本文・タグを検索</label><input id="q" name="q" type="search" placeholder="キーワード・タグで検索" autocomplete="off"></form></section><section class="library" aria-labelledby="list-title"><div class="catalog"><div class="section-heading"><h2 id="list-title">すべてのノート</h2><div class="catalog-controls"><label for="sort" class="sr-only">ノートの並び順</label><select id="sort"><option value="connections">つながりが多い順</option><option value="updated">更新が新しい順</option></select><span id="result-count" class="muted" role="status" aria-live="polite">${pages.length}件</span></div></div><p id="search-status" class="search-status" role="status" aria-live="polite"></p><div id="results" class="note-grid">${pages.slice(0,24).map(p=>card(p)).join('')}</div><button id="more" class="more-button" type="button">もっと見る</button><noscript><p>検索にはJavaScriptが必要です。</p><details><summary>すべてのノートを表示</summary><ul>${pages.map(p=>`<li><a href="${p.url}">${esc(p.title)}</a></li>`).join('')}</ul></details></noscript></div></section></main>`;
 await writeFile('dist/index.html', shell('Knowledge',content));
-await writeFile('dist/catalog.json', JSON.stringify(pages.map(({id,title,tags,excerpt,url,updatedAt})=>({id,title,tags,excerpt,url,updatedAt}))));
+await writeFile('dist/catalog.json', JSON.stringify(pages.map(({id,title,tags,excerpt,url,updatedAt,connections})=>({id,title,tags,excerpt,url,updatedAt,connections}))));
 await writeFile('dist/404.html',shell('ページが見つかりません',`<main id="main" class="article-main"><h1>ページが見つかりません</h1><p><a href="${base}">ノート一覧から探す →</a></p></main>`));
 await writeFile('dist/.nojekyll','');
 const stats = { articles: pages.length, relatedSeconds: +relationSeconds.toFixed(3), generationSeconds: +((performance.now()-start)/1000).toFixed(3) };

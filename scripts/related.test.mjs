@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { words, relatedPages } from './related.mjs';
+import { words, relatedPages, connectionCounts } from './related.mjs';
 
 test('日本語・英語を正規化し、機能語や数値を除く',()=>{
   const tokens=words('Rubyのメモリを調べるために、２０２６年に実行する');
@@ -24,4 +24,10 @@ test('本文とタグの近い記事を推薦し、自分自身・無関係な�
 test('空のコーパスと本文なしのページでも計算可能',()=>{
   assert.deepEqual(relatedPages([]),[]);
   assert.deepEqual(relatedPages([{id:'a',title:'A',tags:[],text:''}]),[[]]);
+});
+
+test('つながりは双方向の相手ページ数で数え、相互リンクを重複計上しない',()=>{
+  const pages=['a','b','c','d'].map(id=>({id}));
+  const links=[[{id:'b'},{id:'b'}],[{id:'a'}],[{id:'a'}],[]];
+  assert.deepEqual(Array.from(connectionCounts(pages,links).values()),[2,1,1,0]);
 });

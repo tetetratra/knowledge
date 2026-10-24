@@ -43,3 +43,15 @@ export function relatedPages(pages, limit = 8) {
     return score >= 0.09 ? [{ id: other.id, score, sharedTags: page.tags.filter(t => tags[j].has(t.normalize('NFKC').toLowerCase())).slice(0, 3) }] : [];
   }).sort((a, b) => b.score - a.score || a.id.localeCompare(b.id)).slice(0, limit));
 }
+
+export function connectionCounts(pages, related) {
+  const neighbors = new Map(pages.map(page => [page.id, new Set()]));
+  for (const [i, links] of related.entries()) {
+    for (const link of links) {
+      if (link.id === pages[i].id || !neighbors.has(link.id)) continue;
+      neighbors.get(pages[i].id).add(link.id);
+      neighbors.get(link.id).add(pages[i].id);
+    }
+  }
+  return new Map(Array.from(neighbors, ([id, set]) => [id, set.size]));
+}

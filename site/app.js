@@ -12,6 +12,7 @@ if (form) {
   const status = document.querySelector('#search-status');
   const heading = document.querySelector('#list-title');
   const more = document.querySelector('#more');
+  const sort = document.querySelector('#sort');
   const catalogPromise = fetch(base + 'catalog.json').then(r => { if (!r.ok) throw new Error('一覧データを取得できません'); return r.json(); });
   let pagefindPromise, active = [], shown = 0, generation = 0, timer;
   const esc = value => String(value).replace(/[&<>"']/g, x => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
@@ -25,10 +26,12 @@ if (form) {
   function syncLocation(push = false) {
     const url = new URL(location.href);
     url.search = ''; if (query.value.trim()) url.searchParams.set('q',query.value.trim());
+    if (sort.value === 'updated') url.searchParams.set('sort', 'updated');
     history[push ? 'pushState' : 'replaceState']({},'',url);
   }
   function readLocation() {
     const params = new URLSearchParams(location.search); query.value = params.get('q') || '';
+    sort.value = params.get('sort') === 'updated' ? 'updated' : 'connections';
   }
   async function showMore(version) {
     more.disabled = true;
@@ -54,6 +57,7 @@ if (form) {
     more.disabled = true; more.hidden = true;
     results.replaceChildren(); count.textContent = ''; status.textContent = '読み込み中…';
     heading.textContent = query.value.trim() ? '検索結果' : 'すべてのノート';
+    sort.hidden = Boolean(query.value.trim());
     try {
       const term = query.value.trim();
       let matches;
@@ -61,7 +65,9 @@ if (form) {
         const engine = await pagefind();
         matches = (await engine.search(term)).results;
       } else {
-        matches = await catalogPromise;
+        matches = [...await catalogPromise].sort((a, b) =>
+          (sort.value === 'updated' ? 0 : b.connections - a.connections) ||
+          b.updatedAt - a.updatedAt || a.title.localeCompare(b.title, 'ja'));
       }
       if (version !== generation) return;
       active = matches; shown = 0; count.textContent = active.length + '件';
@@ -75,6 +81,7 @@ if (form) {
   }
   form.addEventListener('submit',event=>{event.preventDefault();clearTimeout(timer);syncLocation();search();});
   query.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>{syncLocation();search();},220);});
+  sort.addEventListener('change',()=>{clearTimeout(timer);syncLocation(true);search();});
   more.addEventListener('click',()=>showMore(generation).catch(error=>{status.textContent='続きを読み込めませんでした。再度お試しください。';console.error(error);}));
   document.addEventListener('click', event => {
     const link = event.target.closest('a.tag');
