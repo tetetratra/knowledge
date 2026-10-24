@@ -28,7 +28,7 @@ const byFile = new Map(pages.map(p => [p.file, p]));
 md.renderer.rules.image = (tokens, idx, options, env, self) => {
   const token = tokens[idx], src = token.attrGet('src');
   if (!/^\.\.\/assets\/[a-f0-9]{64}\.[a-z]+$/.test(src)) throw new Error(`画像パスが不正: ${src}`);
-  token.attrSet('src', base + src.slice(3)); token.attrSet('loading','lazy'); token.attrSet('decoding','async');
+  token.attrSet('src', base + src.slice(3)); token.attrSet('alt', self.renderInlineAsText(token.children, options)); token.attrSet('loading','lazy'); token.attrSet('decoding','async');
   return self.renderToken(tokens, idx, options);
 };
 const linkOpen = md.renderer.rules.link_open || ((tokens, idx, options, env, self) => self.renderToken(tokens, idx, options));
