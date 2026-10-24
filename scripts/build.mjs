@@ -88,7 +88,7 @@ for (const page of pages) {
     tagCounts.set(key, entry);
   }
 }
-const popularTags = [...tagCounts.values()].sort((a,b) => b.count - a.count || a.tag.localeCompare(b.tag, 'ja')).slice(0,100);
+const popularTags = [...tagCounts.values()].filter(({count}) => count >= 3).sort((a,b) => b.count - a.count || a.tag.localeCompare(b.tag, 'ja')).slice(0,100);
 const popularTagsHtml = `<nav id="popular-tags" class="popular-tags" aria-label="よく使われているタグ">${popularTags.map(({tag}) => chip(tag)).join(' ')}</nav>`;
 const card = (p, shared = []) => `<article class="note-card"><a class="card-link" href="${p.url}"><h3>${esc(p.title)}</h3><p>${esc(p.excerpt)}</p></a><div class="card-tags">${(shared.length ? shared : p.tags).slice(0,3).map(t => chip(t)).join(' ')}</div></article>`;
 function shell(title, content, article = false) {
