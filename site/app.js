@@ -1,3 +1,5 @@
+const version = new URL(import.meta.url).search;
+const { normalizeTitle, splitMatches } = await import('./knowledge.js' + version);
 const base = document.body.dataset.base;
 const form = document.querySelector('#search-form');
 const query = document.querySelector('#q');
@@ -8,12 +10,21 @@ document.addEventListener('keydown', event => {
 });
 if (form) {
   const results = document.querySelector('#results');
+  const exactSection = document.querySelector('#exact-section');
+  const exactResults = document.querySelector('#exact-results');
   const count = document.querySelector('#result-count');
   const status = document.querySelector('#search-status');
   const heading = document.querySelector('#list-title');
   const more = document.querySelector('#more');
   const sort = document.querySelector('#sort');
-  const catalogPromise = fetch(base + 'catalog.json').then(r => { if (!r.ok) throw new Error('一覧データを取得できません'); return r.json(); });
+  const loadJson = async file => {
+    const response = await fetch(base + file, { cache: 'no-cache' });
+    if (!response.ok) throw new Error('一覧データを取得できません');
+    return response.json();
+  };
+  const catalogPromise = loadJson('catalog.json');
+  const tagPagesPromise = loadJson('tag-pages.json');
+  const fragments = new Map();
   let pagefindPromise, active = [], shown = 0, generation = 0, timer;
   const esc = value => String(value).replace(/[&<>"']/g, x => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
   async function pagefind() {
@@ -33,45 +44,56 @@ if (form) {
     const params = new URLSearchParams(location.search); query.value = params.get('q') || '';
     sort.value = params.get('sort') === 'updated' ? 'updated' : 'connections';
   }
+  function cards(pages, tagPages) {
+    return pages.map(item => `<article class="note-card"><a class="card-link" href="${esc(item.url)}"><h3>${esc(item.title)}</h3><p>${item.snippet ?? esc(item.excerpt)}</p></a><div class="card-tags">${item.tags.slice(0,3).map(tag => `<a class="tag" href="${esc(tagPages[normalizeTitle(tag)])}">${esc(tag)}</a>`).join(' ')}</div></article>`).join('');
+  }
   async function showMore(version) {
     more.disabled = true;
     try {
-      const slice = active.slice(shown,shown+24);
-      const catalog = await catalogPromise;
-      const data = await Promise.all(slice.map(async item => {
-        if (!item.data) return { ...item, snippet: esc(item.excerpt) };
-        const result = await item.data();
-        const path = new URL(result.url,location.origin).pathname;
-        const article = catalog.find(p => p.url === path);
-        if (!article) throw new Error('検索結果と記事の対応を確認できません');
-        return { ...article, snippet: result.excerpt };
-      }));
+      const tags = await tagPagesPromise;
       if (version !== generation) return;
-      const html = data.map(item => `<article class="note-card"><a class="card-link" href="${esc(item.url)}"><h3>${esc(item.title)}</h3><p>${item.snippet || ''}</p></a><div class="card-tags">${item.tags.slice(0,3).map(t=>`<a class="tag" href="${base}?q=${encodeURIComponent(t)}">${esc(t)}</a>`).join('')}</div></article>`).join('');
-      results.insertAdjacentHTML('beforeend',html); shown += data.length;
+      const slice = active.slice(shown,shown+24);
+      results.insertAdjacentHTML('beforeend',cards(slice,tags)); shown += slice.length;
       more.hidden = shown >= active.length;
     } finally { if (version === generation) more.disabled = false; }
   }
+  async function matchingPages(term, catalog, version) {
+    const engine = await pagefind();
+    const hits = (await engine.search(term)).results;
+    const byUrl = new Map(catalog.map(page => [page.url,page]));
+    const matches = [];
+    let index = 0;
+    // 全結果を順位付けするためメタデータを読み、同時リクエスト数を制限する。
+    await Promise.all(Array.from({length:Math.min(8,hits.length)},async()=>{
+      while (index < hits.length && version === generation) {
+        const hit = hits[index++];
+        if (!fragments.has(hit.id)) fragments.set(hit.id,hit.data().catch(error=>{fragments.delete(hit.id);throw error;}));
+        const data = await fragments.get(hit.id);
+        const page = byUrl.get(new URL(data.url,location.origin).pathname);
+        if (!page) throw new Error('検索結果と記事の対応を確認できません');
+        matches.push({...page,snippet:data.excerpt});
+      }
+    }));
+    return matches;
+  }
   async function search() {
     const version = ++generation;
+    const term = query.value.trim(), order = sort.value;
     more.disabled = true; more.hidden = true;
-    results.replaceChildren(); count.textContent = ''; status.textContent = '読み込み中…';
-    heading.textContent = query.value.trim() ? '検索結果' : 'すべてのノート';
-    sort.hidden = Boolean(query.value.trim());
+    results.replaceChildren(); exactResults.replaceChildren(); exactSection.hidden = true;
+    count.textContent = ''; status.textContent = '読み込み中…';
+    heading.textContent = term ? '関連' : 'すべてのノート';
     try {
-      const term = query.value.trim();
-      let matches;
-      if (term) {
-        const engine = await pagefind();
-        matches = (await engine.search(term)).results;
-      } else {
-        matches = [...await catalogPromise].sort((a, b) =>
-          (sort.value === 'updated' ? 0 : b.connections - a.connections) ||
-          b.updatedAt - a.updatedAt || a.title.localeCompare(b.title, 'ja'));
-      }
+      const [catalog,tags] = await Promise.all([catalogPromise,tagPagesPromise]);
       if (version !== generation) return;
-      active = matches; shown = 0; count.textContent = active.length + '件';
-      status.textContent = active.length ? '' : '一致するノートがありません。別の言葉で検索してください。';
+      const exact = splitMatches(catalog,[],term,order).exact;
+      exactSection.hidden = !exact.length;
+      exactResults.innerHTML = cards(exact,tags);
+      const matches = term ? await matchingPages(term,catalog,version) : catalog;
+      if (version !== generation) return;
+      active = splitMatches(catalog,matches,term,order).related;
+      shown = 0; count.textContent = active.length + '件';
+      status.textContent = active.length ? '' : exact.length ? '関連するノートはありません。' : '一致するノートがありません。別の言葉で検索してください。';
       await showMore(version);
     } catch (error) {
       if (version !== generation) return;
@@ -83,21 +105,9 @@ if (form) {
   query.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>{syncLocation();search();},220);});
   sort.addEventListener('change',()=>{clearTimeout(timer);syncLocation(true);search();});
   more.addEventListener('click',()=>showMore(generation).catch(error=>{status.textContent='続きを読み込めませんでした。再度お試しください。';console.error(error);}));
-  document.addEventListener('click', event => {
-    const link = event.target.closest('a.tag');
-    if (!link || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    const url = new URL(link.href);
-    if (url.origin !== location.origin || url.pathname !== base || !url.searchParams.has('q')) return;
-    event.preventDefault();
-    clearTimeout(timer);
-    query.value = url.searchParams.get('q');
-    syncLocation(true);
-    query.blur();
-    search();
-  });
   window.addEventListener('popstate',()=>{readLocation();search();});
   readLocation();search();
   if(location.hash==='#q') query.focus();
 }
 
-import('./trail.js' + new URL(import.meta.url).search).then(module => module.mountTrail(base)).catch(console.error);
+import('./trail.js' + version).then(module => module.mountTrail(base)).catch(console.error);

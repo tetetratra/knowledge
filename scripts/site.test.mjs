@@ -45,3 +45,19 @@ test('一覧と初期HTMLをつながりが多い順に揃える',async()=>{
   const first=home.match(/class="card-link" href="([^"]+)"/)[1];
   assert.equal(first,catalog[0].url);
 });
+
+test('タグは同名の実記事を優先し、未作成なら本文が空のページへ移動する',async()=>{
+  const tags=JSON.parse(await readFile('dist/tag-pages.json','utf8'));
+  const normalize=value=>value.normalize('NFKC').trim().toLowerCase();
+  for(const [tag,url] of Object.entries(tags)){
+    assert(!url.includes('?q='));
+    const existing=catalog.filter(page=>normalize(page.title)===tag);
+    if(existing.length) assert(existing.some(page=>page.url===url),tag);
+    else {
+      const html=await readFile(fileFor(url),'utf8');
+      assert(html.includes('data-empty-page'),tag);
+      assert(html.includes('<div class="prose"></div>'),tag);
+      assert(!html.includes('data-pagefind-body'),tag);
+    }
+  }
+});

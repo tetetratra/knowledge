@@ -5,9 +5,10 @@ import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js';
 import { relatedPages, connectionCounts } from './related.mjs';
 import { noteUpdateTimes } from './note-dates.mjs';
+import { normalizeTitle } from '../site/knowledge.js';
 
 const start = performance.now();
-const siteVersion = createHash('sha256').update(await readFile('site/app.js')).update(await readFile('site/site.css')).update(await readFile('site/trail.js')).digest('hex').slice(0, 12);
+const siteVersion = createHash('sha256').update(await readFile('site/app.js')).update(await readFile('site/site.css')).update(await readFile('site/trail.js')).update(await readFile('site/knowledge.js')).digest('hex').slice(0, 12);
 const base = (process.env.BASE_PATH || '/').replace(/\/$/, '') + '/';
 if (!/^\/(?:[a-zA-Z0-9_-]+\/)*$/.test(base)) throw new Error('BASE_PATHが不正');
 const esc = s => String(s).replace(/[&<>"']/g, x => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[x]));
@@ -58,7 +59,23 @@ md.renderer.rules.heading_open = (tokens, idx, options, env, self) => {
   tokens[idx].attrSet('id', `section-${++headingCount}`);
   return self.renderToken(tokens,idx,options);
 };
-const chip = tag => `<a class="tag" href="${base}?q=${encodeURIComponent(tag)}">${esc(tag)}</a>`;
+const titles = new Map();
+for (const page of pages) if (!titles.has(normalizeTitle(page.title))) titles.set(normalizeTitle(page.title), page);
+const tagPages = Object.create(null);
+const emptyPages = new Map();
+for (const page of pages) for (const tag of page.tags) {
+  const key = normalizeTitle(tag);
+  if (Object.hasOwn(tagPages, key)) continue;
+  let target = titles.get(key);
+  if (!target) {
+    const id = createHash('sha256').update('tag:' + key).digest('hex').slice(0, 16);
+    target = { id, title: tag, url: `${base}notes/${id}/` };
+    if (pages.some(page => page.id === id)) throw new Error('空ページのIDが既存記事と重複');
+    emptyPages.set(id, target);
+  }
+  tagPages[key] = target.url;
+}
+const chip = tag => `<a class="tag" href="${esc(tagPages[normalizeTitle(tag)])}">${esc(tag)}</a>`;
 const card = (p, shared = []) => `<article class="note-card"><a class="card-link" href="${p.url}"><h3>${esc(p.title)}</h3><p>${esc(p.excerpt)}</p></a><div class="card-tags">${(shared.length ? shared : p.tags).slice(0,3).map(t => chip(t)).join(' ')}</div></article>`;
 function shell(title, content, article = false) {
   return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Knowledge"><title>${esc(title)}${title === 'Knowledge' ? '' : ' | Knowledge'}</title><link rel="icon" href="${base}favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="${base}site.css?v=${siteVersion}"><script type="module" src="${base}app.js?v=${siteVersion}"></script></head><body data-base="${base}"><a class="skip-link" href="#main">本文へ移動</a><header class="site-header"><div class="header-inner"><a class="brand" href="${base}" aria-label="Knowledge ホーム"><span class="brand-mark" aria-hidden="true">k.</span>Knowledge</a>${article ? `<a class="header-search" href="${base}#q">検索 <kbd>/</kbd></a>` : '<span class="header-count">'+pages.length+' notes</span>'}</div></header><nav id="visit-trail" class="visit-trail" aria-label="閲覧履歴" data-pagefind-ignore hidden></nav>${content}<footer class="site-footer"><a href="${base}">Knowledge</a><a href="#top">ページの先頭へ ↑</a></footer></body></html>`;
@@ -84,8 +101,15 @@ for (const [index,page] of pages.entries()) {
   const directory = `dist/notes/${page.id}`; await mkdir(directory);
   await writeFile(`${directory}/index.html`, shell(page.title, content, true));
 }
+for (const page of emptyPages.values()) {
+  const directory = `dist/notes/${page.id}`;
+  await mkdir(directory);
+  const content = `<main id="main" class="article-main"><nav class="breadcrumb" aria-label="パンくず"><a href="${base}">ノート一覧</a></nav><article class="reading" data-empty-page><header class="article-header"><h1>${esc(page.title)}</h1></header><div class="prose"></div></article></main>`;
+  await writeFile(`${directory}/index.html`, shell(page.title, content, true));
+}
+await writeFile('dist/tag-pages.json', JSON.stringify(tagPages));
 pages.sort((a, b) => b.connections - a.connections || b.updatedAt - a.updatedAt || a.title.localeCompare(b.title, 'ja'));
-const content = `<main id="main" class="library-main"><section class="intro" id="top"><h1 class="sr-only">ノート検索</h1><form id="search-form" class="search-box" role="search"><span class="search-symbol" aria-hidden="true">⌕</span><label class="sr-only" for="q">タイトル・本文・タグを検索</label><input id="q" name="q" type="search" placeholder="キーワード・タグで検索" autocomplete="off"></form></section><section class="library" aria-labelledby="list-title"><div class="catalog"><div class="section-heading"><h2 id="list-title">すべてのノート</h2><div class="catalog-controls"><label for="sort" class="sr-only">ノートの並び順</label><select id="sort"><option value="connections">つながりが多い順</option><option value="updated">更新が新しい順</option></select><span id="result-count" class="muted" role="status" aria-live="polite">${pages.length}件</span></div></div><p id="search-status" class="search-status" role="status" aria-live="polite"></p><div id="results" class="note-grid">${pages.slice(0,24).map(p=>card(p)).join('')}</div><button id="more" class="more-button" type="button">もっと見る</button><noscript><p>検索にはJavaScriptが必要です。</p><details><summary>すべてのノートを表示</summary><ul>${pages.map(p=>`<li><a href="${p.url}">${esc(p.title)}</a></li>`).join('')}</ul></details></noscript></div></section></main>`;
+const content = `<main id="main" class="library-main"><section class="intro" id="top"><h1 class="sr-only">ノート検索</h1><form id="search-form" class="search-box" role="search"><span class="search-symbol" aria-hidden="true">⌕</span><label class="sr-only" for="q">タイトル・本文・タグを検索</label><input id="q" name="q" type="search" placeholder="キーワード・タグで検索" autocomplete="off"></form></section><section id="exact-section" class="exact-section" aria-labelledby="exact-title" hidden><div class="section-heading"><h2 id="exact-title">完全一致</h2></div><div id="exact-results" class="note-grid"></div></section><section class="library" aria-labelledby="list-title"><div class="catalog"><div class="section-heading"><h2 id="list-title">すべてのノート</h2><div class="catalog-controls"><label for="sort" class="sr-only">ノートの並び順</label><select id="sort"><option value="connections">つながりが多い順</option><option value="updated">更新が新しい順</option></select><span id="result-count" class="muted" role="status" aria-live="polite">${pages.length}件</span></div></div><p id="search-status" class="search-status" role="status" aria-live="polite"></p><div id="results" class="note-grid">${pages.slice(0,24).map(p=>card(p)).join('')}</div><button id="more" class="more-button" type="button">もっと見る</button><noscript><p>検索にはJavaScriptが必要です。</p><details><summary>すべてのノートを表示</summary><ul>${pages.map(p=>`<li><a href="${p.url}">${esc(p.title)}</a></li>`).join('')}</ul></details></noscript></div></section></main>`;
 await writeFile('dist/index.html', shell('Knowledge',content));
 await writeFile('dist/catalog.json', JSON.stringify(pages.map(({id,title,tags,excerpt,url,updatedAt,connections})=>({id,title,tags,excerpt,url,updatedAt,connections}))));
 await writeFile('dist/404.html',shell('ページが見つかりません',`<main id="main" class="article-main"><h1>ページが見つかりません</h1><p><a href="${base}">ノート一覧から探す →</a></p></main>`));
