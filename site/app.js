@@ -52,7 +52,7 @@ if (form) {
     try {
       const tags = await tagPagesPromise;
       if (version !== generation) return;
-      const slice = active.slice(shown,shown+24);
+      const slice = active.slice(shown,shown+30);
       results.insertAdjacentHTML('beforeend',cards(slice,tags)); shown += slice.length;
       more.hidden = shown >= active.length;
     } finally { if (version === generation) more.disabled = false; }
@@ -66,12 +66,13 @@ if (form) {
     // 全結果を順位付けするためメタデータを読み、同時リクエスト数を制限する。
     await Promise.all(Array.from({length:Math.min(8,hits.length)},async()=>{
       while (index < hits.length && version === generation) {
-        const hit = hits[index++];
+        const searchRank = index++;
+        const hit = hits[searchRank];
         if (!fragments.has(hit.id)) fragments.set(hit.id,hit.data().catch(error=>{fragments.delete(hit.id);throw error;}));
         const data = await fragments.get(hit.id);
         const page = byUrl.get(new URL(data.url,location.origin).pathname);
         if (!page) throw new Error('検索結果と記事の対応を確認できません');
-        matches.push({...page,snippet:data.excerpt});
+        matches.push({...page,snippet:data.excerpt,searchRank});
       }
     }));
     return matches;
@@ -83,6 +84,7 @@ if (form) {
     results.replaceChildren(); exactResults.replaceChildren(); exactSection.hidden = true;
     count.textContent = ''; status.textContent = '読み込み中…';
     heading.textContent = term ? '関連' : 'すべてのノート';
+    sort.hidden = Boolean(term);
     try {
       const [catalog,tags] = await Promise.all([catalogPromise,tagPagesPromise]);
       if (version !== generation) return;

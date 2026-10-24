@@ -2,20 +2,33 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { normalizeTitle, splitMatches } from '../site/knowledge.js';
 const pages=[
-  {id:'exact',title:'Ruby',connections:1,updatedAt:1},
-  {id:'long',title:'Rubyの長いメモ',connections:5,updatedAt:2},
-  {id:'hub',title:'言語',connections:20,updatedAt:3},
-  {id:'new',title:'最近のRuby',connections:2,updatedAt:9},
+  {id:'exact',title:'Ruby',tags:[],connections:1,updatedAt:1,searchRank:9},
+  {id:'long',title:'Rubyの長いメモ',tags:[],connections:5,updatedAt:2,searchRank:8},
+  {id:'body',title:'言語',tags:[],connections:20,updatedAt:3,searchRank:0},
+  {id:'tag',title:'オブジェクト',tags:['Ruby'],connections:2,updatedAt:9,searchRank:1},
+  {id:'title',title:'最近のRuby',tags:[],connections:1,updatedAt:1,searchRank:2},
 ];
-test('完全一致は独立表示し、関連から除いてつながり順・更新順で並べる',()=>{
-  const connections=splitMatches(pages,pages,'ＲＵＢＹ','connections');
-  assert.deepEqual(connections.exact.map(p=>p.id),['exact']);
-  assert.deepEqual(connections.related.map(p=>p.id),['hub','long','new']);
-  assert.deepEqual(splitMatches(pages,pages,'ruby','updated').related.map(p=>p.id),['new','hub','long']);
+test('完全一致を独立表示し、タイトル・タグ・本文の順に優先する',()=>{
+  const result=splitMatches(pages,pages,'ＲＵＢＹ','connections');
+  assert.deepEqual(result.exact.map(p=>p.id),['exact']);
+  assert.deepEqual(result.related.map(p=>p.id),['title','long','tag','body']);
+  assert.deepEqual(splitMatches(pages,pages,'ruby','updated'),result);
 });
-test('空欄では全件、部分一致だけでは完全一致セクションを表示しない',()=>{
-  assert.equal(splitMatches(pages,pages,'','connections').exact.length,0);
-  assert.equal(splitMatches(pages,pages,'Rub','connections').exact.length,0);
-  assert.equal(splitMatches(pages,pages,'','connections').related.length,4);
+test('同じ一致箇所では検索エンジンの関連度を保ち、つながり数に左右されない',()=>{
+  const matched=[pages[1],pages[4],pages[2]];
+  const result=splitMatches(pages,matched,'Ruby','connections');
+  assert(result.related.findIndex(p=>p.id==='title')<result.related.findIndex(p=>p.id==='long'));
+  assert.equal(result.related.at(-1).id,'body');
+});
+test('タイトル・タグの部分一致を補い、重複を出さない',()=>{
+  const result=splitMatches(pages,[pages[1]],'Rub','connections');
+  assert(result.related.some(p=>p.id==='tag'));
+  assert(result.related.some(p=>p.id==='exact'));
+  assert.equal(result.related.filter(p=>p.id==='long').length,1);
+  assert.equal(result.exact.length,0);
+});
+test('空欄の一覧だけはつながり順・更新順を選べる',()=>{
+  assert.equal(splitMatches(pages,[],'','connections').related[0].id,'body');
+  assert.equal(splitMatches(pages,[],'','updated').related[0].id,'tag');
   assert.equal(normalizeTitle(' Ｒｕｂｙ '),'ruby');
 });
