@@ -85,6 +85,7 @@ if (form) {
     count.textContent = ''; status.textContent = '読み込み中…';
     heading.textContent = term ? '関連' : 'すべてのノート';
     sort.hidden = Boolean(term);
+    document.querySelector('#popular-tags').hidden = Boolean(term);
     try {
       const [catalog,tags] = await Promise.all([catalogPromise,tagPagesPromise]);
       if (version !== generation) return;

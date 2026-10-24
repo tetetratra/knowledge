@@ -76,6 +76,20 @@ for (const page of pages) for (const tag of page.tags) {
   tagPages[key] = target.url;
 }
 const chip = tag => `<a class="tag" href="${esc(tagPages[normalizeTitle(tag)])}">${esc(tag)}</a>`;
+const tagCounts = new Map();
+for (const page of pages) {
+  const seen = new Set();
+  for (const tag of page.tags) {
+    const key = normalizeTitle(tag);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const entry = tagCounts.get(key) || { tag, count: 0 };
+    entry.count++;
+    tagCounts.set(key, entry);
+  }
+}
+const popularTags = [...tagCounts.values()].sort((a,b) => b.count - a.count || a.tag.localeCompare(b.tag, 'ja')).slice(0,100);
+const popularTagsHtml = `<nav id="popular-tags" class="popular-tags" aria-label="よく使われているタグ">${popularTags.map(({tag}) => chip(tag)).join(' ')}</nav>`;
 const card = (p, shared = []) => `<article class="note-card"><a class="card-link" href="${p.url}"><h3>${esc(p.title)}</h3><p>${esc(p.excerpt)}</p></a><div class="card-tags">${(shared.length ? shared : p.tags).slice(0,3).map(t => chip(t)).join(' ')}</div></article>`;
 function shell(title, content, article = false) {
   return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Knowledge"><title>${esc(title)}${title === 'Knowledge' ? '' : ' | Knowledge'}</title><link rel="icon" href="${base}favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="${base}site.css?v=${siteVersion}"><script type="module" src="${base}app.js?v=${siteVersion}"></script></head><body data-base="${base}"><a class="skip-link" href="#main">本文へ移動</a><header class="site-header"><div class="header-inner"><a class="brand" href="${base}" aria-label="Knowledge ホーム"><span class="brand-mark" aria-hidden="true">k.</span>Knowledge</a>${article ? `<a class="header-search" href="${base}#q">検索 <kbd>/</kbd></a>` : '<span class="header-count">'+pages.length+' notes</span>'}</div></header><nav id="visit-trail" class="visit-trail" aria-label="閲覧履歴" data-pagefind-ignore hidden></nav>${content}<footer class="site-footer"><a href="${base}">Knowledge</a><a href="#top">ページの先頭へ ↑</a></footer></body></html>`;
@@ -119,7 +133,7 @@ for (const page of emptyPages.values()) {
 }
 await writeFile('dist/tag-pages.json', JSON.stringify(tagPages));
 pages.sort((a, b) => b.connections - a.connections || b.updatedAt - a.updatedAt || a.title.localeCompare(b.title, 'ja'));
-const content = `<main id="main" class="library-main"><section class="intro" id="top"><h1 class="sr-only">ノート検索</h1><form id="search-form" class="search-box" role="search"><span class="search-symbol" aria-hidden="true">⌕</span><label class="sr-only" for="q">タイトル・本文・タグを検索</label><input id="q" name="q" type="search" placeholder="キーワード・タグで検索" autocomplete="off"></form></section><section id="exact-section" class="exact-section" aria-labelledby="exact-title" hidden><div class="section-heading"><h2 id="exact-title">完全一致</h2></div><div id="exact-results" class="note-grid"></div></section><section class="library" aria-labelledby="list-title"><div class="catalog"><div class="section-heading"><h2 id="list-title">すべてのノート</h2><div class="catalog-controls"><label for="sort" class="sr-only">ノートの並び順</label><select id="sort"><option value="connections">つながりが多い順</option><option value="updated">更新が新しい順</option></select><span id="result-count" class="muted" role="status" aria-live="polite">${pages.length}件</span></div></div><p id="search-status" class="search-status" role="status" aria-live="polite"></p><div id="results" class="note-grid">${pages.slice(0,100).map(p=>card(p)).join('')}</div><button id="more" class="more-button" type="button">もっと見る</button><noscript><p>検索にはJavaScriptが必要です。</p><details><summary>すべてのノートを表示</summary><ul>${pages.map(p=>`<li><a href="${p.url}">${esc(p.title)}</a></li>`).join('')}</ul></details></noscript></div></section></main>`;
+const content = `<main id="main" class="library-main"><section class="intro" id="top"><h1 class="sr-only">ノート検索</h1><form id="search-form" class="search-box" role="search"><span class="search-symbol" aria-hidden="true">⌕</span><label class="sr-only" for="q">タイトル・本文・タグを検索</label><input id="q" name="q" type="search" placeholder="キーワード・タグで検索" autocomplete="off"></form>${popularTagsHtml}</section><section id="exact-section" class="exact-section" aria-labelledby="exact-title" hidden><div class="section-heading"><h2 id="exact-title">完全一致</h2></div><div id="exact-results" class="note-grid"></div></section><section class="library" aria-labelledby="list-title"><div class="catalog"><div class="section-heading"><h2 id="list-title">すべてのノート</h2><div class="catalog-controls"><label for="sort" class="sr-only">ノートの並び順</label><select id="sort"><option value="connections">つながりが多い順</option><option value="updated">更新が新しい順</option></select><span id="result-count" class="muted" role="status" aria-live="polite">${pages.length}件</span></div></div><p id="search-status" class="search-status" role="status" aria-live="polite"></p><div id="results" class="note-grid">${pages.slice(0,100).map(p=>card(p)).join('')}</div><button id="more" class="more-button" type="button">もっと見る</button><noscript><p>検索にはJavaScriptが必要です。</p><details><summary>すべてのノートを表示</summary><ul>${pages.map(p=>`<li><a href="${p.url}">${esc(p.title)}</a></li>`).join('')}</ul></details></noscript></div></section></main>`;
 await writeFile('dist/index.html', shell('Knowledge',content));
 await writeFile('dist/catalog.json', JSON.stringify(pages.map(({id,title,tags,excerpt,url,updatedAt,connections})=>({id,title,tags,excerpt,url,updatedAt,connections}))));
 await writeFile('dist/404.html',shell('ページが見つかりません',`<main id="main" class="article-main"><h1>ページが見つかりません</h1><p><a href="${base}">ノート一覧から探す →</a></p></main>`));
