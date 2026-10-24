@@ -53,4 +53,6 @@ export async function mountRelated(base, version) {
   }
   select.addEventListener('change',()=>{shown=8;render();});
   more.addEventListener('click',()=>{shown+=8;render();});
+  select.disabled = false;
+  more.disabled = false;
 }

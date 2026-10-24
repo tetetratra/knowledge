@@ -99,7 +99,7 @@ const byId = new Map(pages.map(p => [p.id,p]));
 function relatedSection(page) {
   const links = relatedById.get(page.id);
   const cards = links.slice(0,8).map(link => card(byId.get(link.id),link.sharedTags)).join('');
-  return `<section class="related" data-related-id="${page.id}" aria-labelledby="related-title"><div class="section-heading"><h2 id="related-title">関連するノート</h2><div class="catalog-controls"><label class="sr-only" for="related-sort">関連記事の並び順</label><select id="related-sort"><option value="relevance">関連度が高い順</option><option value="updated">更新が新しい順</option></select></div></div><p data-related-status class="search-status" role="status" hidden></p><div class="note-grid related-grid" data-related-results>${cards || '<p class="muted">関連するノートはまだありません。</p>'}</div><button type="button" class="more-button" data-related-more${links.length <= 8 ? ' hidden' : ''}>もっと見る</button></section>`;
+  return `<section class="related" data-related-id="${page.id}" aria-labelledby="related-title"><div class="section-heading"><h2 id="related-title">関連するノート</h2><div class="catalog-controls"><label class="sr-only" for="related-sort">関連記事の並び順</label><select id="related-sort" disabled><option value="relevance">関連度が高い順</option><option value="updated">更新が新しい順</option></select></div></div><p data-related-status class="search-status" role="status" hidden></p><div class="note-grid related-grid" data-related-results>${cards || '<p class="muted">関連するノートはまだありません。</p>'}</div><button type="button" class="more-button" data-related-more disabled${links.length <= 8 ? ' hidden' : ''}>もっと見る</button></section>`;
 }
 for (const page of queries) await writeFile(`dist/related/${page.id}.json`, JSON.stringify(relatedById.get(page.id)));
 for (const page of pages) {
