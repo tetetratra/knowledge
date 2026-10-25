@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile, stat, readdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
+import { tagRelations } from './tag-relations.mjs';
 
 const catalog=JSON.parse(await readFile('dist/catalog.json','utf8'));
 const base=new URL(catalog[0].url,'https://example.test').pathname.split('notes/')[0];
@@ -15,15 +16,14 @@ test('全記事を出力し、記事・検索インデックス・生成物をGi
   assert(existsSync('dist/pagefind/pagefind.js'));
   const ignored=await readFile('.gitignore','utf8');assert(ignored.includes('dist/'));
 });
-test('全記事のローカルリンクと画像が存在し、関連記事は自身を含まず最大100件',async()=>{
+test('全記事のローカルリンクと画像が存在し、関連一覧は自身を含まない',async()=>{
   for(const page of catalog){
     const html=await readFile(fileFor(page.url),'utf8');
     assert(html.includes('data-pagefind-body'));assert(!html.includes('<script>alert('));
-    const related=html.split('aria-labelledby="related-title"')[1];
+    const related=html.split('class="related"')[1] || '';
     const recommendations=[...related.matchAll(/class="card-link" href="([^"]+)"/g)].map(m=>m[1]);
-    const candidates=JSON.parse(await readFile(`dist/related/${page.id}.json`,'utf8'));
-    assert.equal(recommendations.length,Math.min(100,candidates.length));assert(!recommendations.includes(page.url));
-    assert.equal(new Set(recommendations).size,recommendations.length);
+    assert(!recommendations.includes(page.url));
+    assert(!html.includes('id="related-sort"'));
     for(const match of html.matchAll(/(?:href|src)="([^"]+)"/g)){
       const value=match[1].replaceAll('&amp;','&');
       if(/^(https?:|mailto:|tel:|#)/i.test(value))continue;
@@ -36,15 +36,15 @@ test('全記事のローカルリンクと画像が存在し、関連記事は�
   }
 });
 
-test('一覧と初期HTMLをつながりが多い順に揃える',async()=>{
+test('一覧と初期HTMLを更新が新しい順に揃え、ソートUIを出さない',async()=>{
   for(let i=0;i<catalog.length;i++){
     assert(Number.isFinite(catalog[i].updatedAt) && catalog[i].updatedAt>0);
-    assert(Number.isInteger(catalog[i].connections) && catalog[i].connections>=0);
-    if(i)assert(catalog[i-1].connections>=catalog[i].connections);
+    if(i)assert(catalog[i-1].updatedAt>=catalog[i].updatedAt);
   }
   const home=await readFile('dist/index.html','utf8');
   const first=home.match(/class="card-link" href="([^"]+)"/)[1];
   assert.equal(first,catalog[0].url);
+  assert(!home.includes('id="sort"'));
   assert.equal([...home.matchAll(/class="card-link"/g)].length,Math.min(100,catalog.length));
 });
 
@@ -64,23 +64,30 @@ test('タグは同名の実記事を優先し、未作成なら本文が空の�
   }
 });
 
-test('実記事と空ページの関連候補が有効で、空のRubyページにも関連記事がある',async()=>{
-  const ids=new Set(catalog.map(page=>page.id));
-  for(const file of await readdir('dist/related')){
-    const links=JSON.parse(await readFile('dist/related/'+file,'utf8'));
-    assert.equal(new Set(links.map(link=>link.id)).size,links.length);
-    for(const link of links){
-      assert(ids.has(link.id));assert.notEqual(link.id,file.replace('.json',''));
-      assert(Number.isFinite(link.score));
-    }
-  }
+test('親子を見出しのない一つの一覧にまとめ、重複を除き初期100件を表示する',async()=>{
   const tags=JSON.parse(await readFile('dist/tag-pages.json','utf8'));
-  const id=tags.ruby.split('/').filter(Boolean).at(-1);
-  const links=JSON.parse(await readFile('dist/related/'+id+'.json','utf8'));
-  assert(links.length>0);
-  const html=await readFile(fileFor(tags.ruby),'utf8');
-  assert(html.includes('id="related-sort"'));
-  assert(html.includes('class="card-link"'));
+  const byUrl=new Map(catalog.map(page=>[page.url,page]));
+  for(const [title,url] of Object.entries(tags)) if(!byUrl.has(url)) {
+    byUrl.set(url,{id:url.split('/').filter(Boolean).at(-1),title,url});
+  }
+  const pages=[...byUrl.values()];
+  const relations=tagRelations(pages,tags);
+  for(const page of pages){
+    const html=await readFile(fileFor(page.url),'utf8');
+    const group=html.split('data-related-group')[1] || '';
+    const {parents,children}=relations.get(page.id);
+    const expected=[...new Map([...parents,...children].map(target=>[target.id,target])).values()];
+    const urls=[...group.matchAll(/class="card-link" href="([^"]+)"/g)].map(match=>match[1]);
+    assert.deepEqual(urls,expected.map(target=>target.url),page.title);
+    assert.equal(new Set(urls).size,urls.length);
+    assert.equal([...group.matchAll(/<div hidden>/g)].length,Math.max(0,urls.length-100));
+    assert(!group.includes('<h2'));
+    assert(!group.includes('class="card-tags"'));
+    assert(!group.includes('該当するノートはありません。'));
+    assert(!group.includes('related-sort'));
+  }
+  const ruby=byUrl.get(tags.ruby);
+  assert(relations.get(ruby.id).children.length>0);
 });
 
 test('トップ・記事・空ページ・404を含む全HTMLに検索掲載を拒否する指定がある',async()=>{

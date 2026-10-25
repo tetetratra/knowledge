@@ -1,9 +1,8 @@
 export const normalizeTitle = value => value.normalize('NFKC').trim().toLowerCase();
 
-export function sortNotes(pages, order = 'connections') {
+export function sortNotes(pages) {
   return [...pages].sort((a, b) =>
-    (order === 'updated' ? 0 : b.connections - a.connections) ||
-    b.updatedAt - a.updatedAt || a.title.localeCompare(b.title, 'ja'));
+    (b.updatedAt || 0) - (a.updatedAt || 0) || a.title.localeCompare(b.title, 'ja'));
 }
 
 function searchTier(page, term) {
@@ -14,8 +13,8 @@ function searchTier(page, term) {
   return 2;
 }
 
-export function splitMatches(catalog, matched, term, order) {
-  if (!term.trim()) return { exact: [], related: sortNotes(catalog, order) };
+export function splitMatches(catalog, matched, term) {
+  if (!term.trim()) return { exact: [], related: sortNotes(catalog) };
   const exact = catalog.filter(page => normalizeTitle(page.title) === normalizeTitle(term));
   const exactIds = new Set(exact.map(page => page.id));
   const candidates = new Map(matched.map(page => [page.id, page]));

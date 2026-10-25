@@ -27,8 +27,8 @@ test('タイトル・タグの部分一致を補い、重複を出さない',()=
   assert.equal(result.related.filter(p=>p.id==='long').length,1);
   assert.equal(result.exact.length,0);
 });
-test('空欄の一覧だけはつながり順・更新順を選べる',()=>{
-  assert.equal(splitMatches(pages,[],'','connections').related[0].id,'body');
+test('空欄の一覧は更新が新しい順に固定する',()=>{
+  assert.equal(splitMatches(pages,[],'','connections').related[0].id,'tag');
   assert.equal(splitMatches(pages,[],'','updated').related[0].id,'tag');
   assert.equal(normalizeTitle(' Ｒｕｂｙ '),'ruby');
 });

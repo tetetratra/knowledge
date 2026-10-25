@@ -16,7 +16,6 @@ if (form) {
   const status = document.querySelector('#search-status');
   const heading = document.querySelector('#list-title');
   const more = document.querySelector('#more');
-  const sort = document.querySelector('#sort');
   const loadJson = async file => {
     const response = await fetch(base + file, { cache: 'no-cache' });
     if (!response.ok) throw new Error('一覧データを取得できません');
@@ -37,12 +36,10 @@ if (form) {
   function syncLocation(push = false) {
     const url = new URL(location.href);
     url.search = ''; if (query.value.trim()) url.searchParams.set('q',query.value.trim());
-    if (sort.value === 'updated') url.searchParams.set('sort', 'updated');
     history[push ? 'pushState' : 'replaceState']({},'',url);
   }
   function readLocation() {
     const params = new URLSearchParams(location.search); query.value = params.get('q') || '';
-    sort.value = params.get('sort') === 'updated' ? 'updated' : 'connections';
   }
   function cards(pages, tagPages) {
     return pages.map(item => `<article class="note-card"><a class="card-link" href="${esc(item.url)}"><h3>${esc(item.title)}</h3><p>${item.snippet ?? esc(item.excerpt)}</p></a><div class="card-tags">${item.tags.slice(0,3).map(tag => `<a class="tag" href="${esc(tagPages[normalizeTitle(tag)])}">${esc(tag)}</a>`).join(' ')}</div></article>`).join('');
@@ -79,22 +76,21 @@ if (form) {
   }
   async function search() {
     const version = ++generation;
-    const term = query.value.trim(), order = sort.value;
+    const term = query.value.trim();
     more.disabled = true; more.hidden = true;
     results.replaceChildren(); exactResults.replaceChildren(); exactSection.hidden = true;
     count.textContent = ''; status.textContent = '読み込み中…';
     heading.textContent = term ? '関連' : 'すべてのノート';
-    sort.hidden = Boolean(term);
     document.querySelector('#popular-tags').hidden = Boolean(term);
     try {
       const [catalog,tags] = await Promise.all([catalogPromise,tagPagesPromise]);
       if (version !== generation) return;
-      const exact = splitMatches(catalog,[],term,order).exact;
+      const exact = splitMatches(catalog,[],term).exact;
       exactSection.hidden = !exact.length;
       exactResults.innerHTML = cards(exact,tags);
       const matches = term ? await matchingPages(term,catalog,version) : catalog;
       if (version !== generation) return;
-      active = splitMatches(catalog,matches,term,order).related;
+      active = splitMatches(catalog,matches,term).related;
       shown = 0; count.textContent = active.length + '件';
       status.textContent = active.length ? '' : exact.length ? '関連するノートはありません。' : '一致するノートがありません。別の言葉で検索してください。';
       await showMore(version);
@@ -106,7 +102,6 @@ if (form) {
   }
   form.addEventListener('submit',event=>{event.preventDefault();clearTimeout(timer);syncLocation();search();});
   query.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>{syncLocation();search();},220);});
-  sort.addEventListener('change',()=>{clearTimeout(timer);syncLocation(true);search();});
   more.addEventListener('click',()=>showMore(generation).catch(error=>{status.textContent='続きを読み込めませんでした。再度お試しください。';console.error(error);}));
   window.addEventListener('popstate',()=>{readLocation();search();});
   readLocation();search();

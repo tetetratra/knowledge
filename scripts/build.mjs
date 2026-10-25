@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js';
-import { relatedPages, connectionCounts } from './related.mjs';
+import { tagRelations } from './tag-relations.mjs';
 import { noteUpdateTimes } from './note-dates.mjs';
 import { normalizeTitle } from '../site/knowledge.js';
 
@@ -90,32 +90,24 @@ for (const page of pages) {
 }
 const popularTags = [...tagCounts.values()].filter(({count}) => count >= 3).sort((a,b) => b.count - a.count || a.tag.localeCompare(b.tag, 'ja')).slice(0,100);
 const popularTagsHtml = `<nav id="popular-tags" class="popular-tags" aria-label="よく使われているタグ">${popularTags.map(({tag}) => chip(tag)).join(' ')}</nav>`;
-const card = (p, shared = []) => `<article class="note-card"><a class="card-link" href="${p.url}"><h3>${esc(p.title)}</h3><p>${esc(p.excerpt)}</p></a><div class="card-tags">${(shared.length ? shared : p.tags).slice(0,3).map(t => chip(t)).join(' ')}</div></article>`;
+const card = (p, shared = [], showTags = true) => `<article class="note-card"><a class="card-link" href="${p.url}"><h3>${esc(p.title)}</h3><p>${esc(p.excerpt || '')}</p></a>${showTags ? `<div class="card-tags">${(shared.length ? shared : (p.tags || [])).slice(0,3).map(t => chip(t)).join(' ')}</div>` : ''}</article>`;
 function shell(title, content, article = false) {
   return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Knowledge"><meta name="robots" content="noindex, noimageindex"><title>${esc(title)}${title === 'Knowledge' ? '' : ' | Knowledge'}</title><link rel="icon" href="${base}favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="${base}site.css?v=${siteVersion}"><script type="module" src="${base}app.js?v=${siteVersion}"></script></head><body data-base="${base}"><a class="skip-link" href="#main">本文へ移動</a><header class="site-header"><div class="header-inner"><a class="brand" href="${base}" aria-label="Knowledge ホーム"><span class="brand-mark" aria-hidden="true">k.</span>Knowledge</a>${article ? `<a class="header-search" href="${base}#q">検索 <kbd>/</kbd></a>` : '<span class="header-count">'+pages.length+' notes</span>'}</div></header><nav id="visit-trail" class="visit-trail" aria-label="閲覧履歴" data-pagefind-ignore hidden></nav>${content}<footer class="site-footer"><a href="${base}">Knowledge</a><a href="#top">ページの先頭へ ↑</a></footer></body></html>`;
 }
 await rm('dist', { recursive: true, force: true });
 await mkdir('dist/notes', { recursive: true });
-await mkdir('dist/related', { recursive: true });
 await cp('assets','dist/assets', { recursive: true });
 await cp('site','dist', { recursive: true });
 await cp('node_modules/highlight.js/styles/github.css','dist/code.css');
 const relationStart = performance.now();
-const queries = [...pages, ...Array.from(emptyPages.values(), page => ({...page, text:'', tags:[page.title], isTag:true}))];
-const allRelated = relatedPages(pages, pages.length, queries);
-const relatedById = new Map(queries.map((page, i) => [page.id, allRelated[i]]));
-// 一覧のつながり数は従来どおり、実記事の上位8件から数える。
-const related = allRelated.slice(0, pages.length).map(links => links.slice(0, 8));
-const connections = connectionCounts(pages, related);
-for (const page of pages) page.connections = connections.get(page.id);
+const relations = tagRelations([...pages, ...emptyPages.values()], tagPages);
 const relationSeconds = (performance.now() - relationStart) / 1000;
-const byId = new Map(pages.map(p => [p.id,p]));
 function relatedSection(page) {
-  const links = relatedById.get(page.id);
-  const cards = links.slice(0,100).map(link => card(byId.get(link.id),link.sharedTags)).join('');
-  return `<section class="related" data-related-id="${page.id}" aria-labelledby="related-title"><div class="section-heading"><h2 id="related-title">関連するノート</h2><div class="catalog-controls"><label class="sr-only" for="related-sort">関連記事の並び順</label><select id="related-sort" disabled><option value="relevance">関連度が高い順</option><option value="updated">更新が新しい順</option></select></div></div><p data-related-status class="search-status" role="status" hidden></p><div class="note-grid related-grid" data-related-results>${cards || '<p class="muted">関連するノートはまだありません。</p>'}</div><button type="button" class="more-button" data-related-more disabled${links.length <= 100 ? ' hidden' : ''}>もっと見る</button></section>`;
+  const {parents, children} = relations.get(page.id);
+  const links = [...new Map([...parents, ...children].map(target => [target.id, target])).values()];
+  if (!links.length) return '';
+  return `<section class="related" data-related-group aria-label="関連するノート"><div class="note-grid related-grid">${links.map((target,i) => `<div${i >= 100 ? ' hidden' : ''}>${card(target, [], false)}</div>`).join('')}</div><button type="button" class="more-button" data-related-more${links.length <= 100 ? ' hidden' : ''}>もっと見る</button></section>`;
 }
-for (const page of queries) await writeFile(`dist/related/${page.id}.json`, JSON.stringify(relatedById.get(page.id)));
 for (const page of pages) {
   headingCount = 0;
   const rendered = md.render(page.body);
@@ -132,10 +124,10 @@ for (const page of emptyPages.values()) {
   await writeFile(`${directory}/index.html`, shell(page.title, content, true));
 }
 await writeFile('dist/tag-pages.json', JSON.stringify(tagPages));
-pages.sort((a, b) => b.connections - a.connections || b.updatedAt - a.updatedAt || a.title.localeCompare(b.title, 'ja'));
-const content = `<main id="main" class="library-main"><section class="intro" id="top"><h1 class="sr-only">ノート検索</h1><form id="search-form" class="search-box" role="search"><span class="search-symbol" aria-hidden="true">⌕</span><label class="sr-only" for="q">タイトル・本文・タグを検索</label><input id="q" name="q" type="search" placeholder="キーワード・タグで検索" autocomplete="off"></form>${popularTagsHtml}</section><section id="exact-section" class="exact-section" aria-labelledby="exact-title" hidden><div class="section-heading"><h2 id="exact-title">完全一致</h2></div><div id="exact-results" class="note-grid"></div></section><section class="library" aria-labelledby="list-title"><div class="catalog"><div class="section-heading"><h2 id="list-title">すべてのノート</h2><div class="catalog-controls"><label for="sort" class="sr-only">ノートの並び順</label><select id="sort"><option value="connections">つながりが多い順</option><option value="updated">更新が新しい順</option></select><span id="result-count" class="muted" role="status" aria-live="polite">${pages.length}件</span></div></div><p id="search-status" class="search-status" role="status" aria-live="polite"></p><div id="results" class="note-grid">${pages.slice(0,100).map(p=>card(p)).join('')}</div><button id="more" class="more-button" type="button">もっと見る</button><noscript><p>検索にはJavaScriptが必要です。</p><details><summary>すべてのノートを表示</summary><ul>${pages.map(p=>`<li><a href="${p.url}">${esc(p.title)}</a></li>`).join('')}</ul></details></noscript></div></section></main>`;
+pages.sort((a, b) => b.updatedAt - a.updatedAt || a.title.localeCompare(b.title, 'ja'));
+const content = `<main id="main" class="library-main"><section class="intro" id="top"><h1 class="sr-only">ノート検索</h1><form id="search-form" class="search-box" role="search"><span class="search-symbol" aria-hidden="true">⌕</span><label class="sr-only" for="q">タイトル・本文・タグを検索</label><input id="q" name="q" type="search" placeholder="キーワード・タグで検索" autocomplete="off"></form>${popularTagsHtml}</section><section id="exact-section" class="exact-section" aria-labelledby="exact-title" hidden><div class="section-heading"><h2 id="exact-title">完全一致</h2></div><div id="exact-results" class="note-grid"></div></section><section class="library" aria-labelledby="list-title"><div class="catalog"><div class="section-heading"><h2 id="list-title">すべてのノート</h2><div class="catalog-controls"><span id="result-count" class="muted" role="status" aria-live="polite">${pages.length}件</span></div></div><p id="search-status" class="search-status" role="status" aria-live="polite"></p><div id="results" class="note-grid">${pages.slice(0,100).map(p=>card(p)).join('')}</div><button id="more" class="more-button" type="button">もっと見る</button><noscript><p>検索にはJavaScriptが必要です。</p><details><summary>すべてのノートを表示</summary><ul>${pages.map(p=>`<li><a href="${p.url}">${esc(p.title)}</a></li>`).join('')}</ul></details></noscript></div></section></main>`;
 await writeFile('dist/index.html', shell('Knowledge',content));
-await writeFile('dist/catalog.json', JSON.stringify(pages.map(({id,title,tags,excerpt,url,updatedAt,connections})=>({id,title,tags,excerpt,url,updatedAt,connections}))));
+await writeFile('dist/catalog.json', JSON.stringify(pages.map(({id,title,tags,excerpt,url,updatedAt})=>({id,title,tags,excerpt,url,updatedAt}))));
 await writeFile('dist/404.html',shell('ページが見つかりません',`<main id="main" class="article-main"><h1>ページが見つかりません</h1><p><a href="${base}">ノート一覧から探す →</a></p></main>`));
 await writeFile('dist/.nojekyll','');
 const stats = { articles: pages.length, relatedSeconds: +relationSeconds.toFixed(3), generationSeconds: +((performance.now()-start)/1000).toFixed(3) };

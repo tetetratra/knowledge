@@ -11,3 +11,5 @@
 .exact-section{border-top:1px solid var(--line);padding:28px 0}.exact-section:not([hidden])+.library{padding-top:28px}
 
 .popular-tags{display:flex;gap:7px;margin-top:16px;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;padding:4px 4px 10px}.popular-tags .tag{flex:none;white-space:nowrap;max-width:none;font-size:12px;padding:5px 9px}
+
+.related-grid>div>.note-card{height:100%}
