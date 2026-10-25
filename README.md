@@ -14,3 +14,5 @@ npm run preview
 ```
 
 `main` へのpush時にGitHub Pagesへ公開する。生成物は `dist/` に出力し、Git管理しない。
+
+検索は文字一致を優先し、意味が近い結果を後から追加する。ビルド時に日本語StaticEmbeddingモデルを取得・軽量化し、生成物として配信する。モデルの出典・ライセンスは `scripts/embedding-LICENSE.txt` を参照。

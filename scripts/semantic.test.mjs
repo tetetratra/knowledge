@@ -1,0 +1,30 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { Tokenizer } from '@huggingface/tokenizers';
+import { embedTokens, semanticMatches } from '../site/embedding.js';
+const config=JSON.parse(await readFile('dist/semantic/manifest.json'));
+const load=async file=>readFile('dist/semantic/'+file);
+const raw=await load(config.weights);
+const scales=new Float32Array(raw.buffer,raw.byteOffset,config.vocabulary);
+const weights=new Int8Array(raw.buffer,raw.byteOffset+config.vocabulary*4);
+const tokenizer=new Tokenizer(JSON.parse(await load(config.tokenizer)),{});
+const encode=text=>embedTokens(tokenizer.encode(text,{add_special_tokens:false}).ids,weights,scales,config.dimensions);
+const cosine=(a,b)=>a.reduce((sum,n,i)=>sum+n*b[i],0);
+test('モデルと辞書は7MB未満で、DBとデータベースの意味が近い',async()=>{
+  assert(raw.byteLength+(await load(config.tokenizer)).byteLength<7_000_000);
+  assert(cosine(encode('DB'),encode('データベース'))>.5);
+  assert(cosine(encode('DB'),encode('データベース'))>cosine(encode('DB'),encode('仕事術'))+.3);
+  assert.equal(tokenizer.encode('ＤＢ',{add_special_tokens:false}).ids.join(','),tokenizer.encode('db',{add_special_tokens:false}).ids.join(','));
+});
+test('実ノートの上位20件にMySQLなどのデータベース関連ノートが入り、チャンク重複を除く',async()=>{
+  const buffer=await load(config.vectors);
+  const vectors=new Float32Array(buffer.buffer,buffer.byteOffset,buffer.byteLength/4);
+  const ids=JSON.parse(await load(config.ids));
+  const matches=semanticMatches(encode('DB'),vectors,ids,config.dimensions);
+  const catalog=JSON.parse(await readFile('dist/catalog.json'));
+  const titles=matches.map(hit=>catalog.find(page=>page.id===hit.id)?.title);
+  assert(titles.includes('MySQL'),titles.join(', '));
+  assert(matches.length<=20);assert.equal(new Set(matches.map(hit=>hit.id)).size,matches.length);
+  assert.deepEqual(semanticMatches(new Float32Array(config.dimensions),vectors,ids,config.dimensions),[]);
+});

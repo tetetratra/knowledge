@@ -1,34 +1,29 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeTitle, splitMatches } from '../site/knowledge.js';
+import { normalizeTitle, literalMatches, appendSemantic } from '../site/knowledge.js';
 const pages=[
-  {id:'exact',title:'Ruby',tags:[],connections:1,updatedAt:1,searchRank:9},
-  {id:'long',title:'Rubyの長いメモ',tags:[],connections:5,updatedAt:2,searchRank:8},
-  {id:'body',title:'言語',tags:[],connections:20,updatedAt:3,searchRank:0},
-  {id:'tag',title:'オブジェクト',tags:['Ruby'],connections:2,updatedAt:9,searchRank:1},
-  {id:'title',title:'最近のRuby',tags:[],connections:1,updatedAt:1,searchRank:2},
+  {id:'exact',title:'Ruby',tags:[],updatedAt:1},
+  {id:'title',title:'Rubyのメモ',tags:[],updatedAt:2},
+  {id:'tag',title:'オブジェクト',tags:['Ruby'],updatedAt:9},
+  {id:'body',title:'言語',tags:[],updatedAt:30},
+  {id:'semantic',title:'動的型付け',tags:[],updatedAt:50},
 ];
-test('完全一致を独立表示し、タイトル・タグ・本文の順に優先する',()=>{
-  const result=splitMatches(pages,pages,'ＲＵＢＹ','connections');
+test('完全一致・タイトル部分一致・タグ・本文の順を更新日時より優先する',()=>{
+  const result=literalMatches(pages,{body:'Rubyについて書いた本文'},'ＲＵＢＹ');
   assert.deepEqual(result.exact.map(p=>p.id),['exact']);
-  assert.deepEqual(result.related.map(p=>p.id),['title','long','tag','body']);
-  assert.deepEqual(splitMatches(pages,pages,'ruby','updated'),result);
+  assert.deepEqual(result.related.map(p=>p.id),['title','tag','body']);
 });
-test('同じ一致箇所では検索エンジンの関連度を保ち、つながり数に左右されない',()=>{
-  const matched=[pages[1],pages[4],pages[2]];
-  const result=splitMatches(pages,matched,'Ruby','connections');
-  assert(result.related.findIndex(p=>p.id==='title')<result.related.findIndex(p=>p.id==='long'));
-  assert.equal(result.related.at(-1).id,'body');
+test('本文は単語区切りに依存せず部分一致し、複数語はAND検索する',()=>{
+  assert.deepEqual(literalMatches(pages,{body:'例外をキャッチする方法'},'キャッチす').related.map(p=>p.id),['body']);
+  assert.equal(literalMatches(pages,{body:'Rubyで例外をキャッチする'},'Ruby 例外').related[0].id,'body');
+  assert.equal(literalMatches(pages,{body:'Rubyについて'},'Ruby 例外').related.length,0);
 });
-test('タイトル・タグの部分一致を補い、重複を出さない',()=>{
-  const result=splitMatches(pages,[pages[1]],'Rub','connections');
-  assert(result.related.some(p=>p.id==='tag'));
-  assert(result.related.some(p=>p.id==='exact'));
-  assert.equal(result.related.filter(p=>p.id==='long').length,1);
-  assert.equal(result.exact.length,0);
+test('意味検索は文字一致の後へ追加し、スコアの高さで先頭を入れ替えない',()=>{
+  const literal=literalMatches(pages,{body:'Ruby'},'Ruby');
+  const extra=appendSemantic(pages,literal,[{id:'exact'},{id:'body'},{id:'semantic'},{id:'semantic'},{id:'missing'}]);
+  assert.deepEqual(extra.map(p=>p.id),['semantic']);
 });
-test('空欄の一覧は更新が新しい順に固定する',()=>{
-  assert.equal(splitMatches(pages,[],'','connections').related[0].id,'tag');
-  assert.equal(splitMatches(pages,[],'','updated').related[0].id,'tag');
+test('空欄は更新順に固定し、全角半角と英字の大小を正規化する',()=>{
+  assert.equal(literalMatches(pages,{},'').related[0].id,'semantic');
   assert.equal(normalizeTitle(' Ｒｕｂｙ '),'ruby');
 });

@@ -13,7 +13,9 @@ test('全記事を出力し、記事・検索インデックス・生成物をGi
   const stats=JSON.parse(await readFile('dist/build-stats.json','utf8'));
   assert.equal(catalog.length,stats.articles);
   assert.equal(new Set(catalog.map(p=>p.id)).size,catalog.length);
-  assert(existsSync('dist/pagefind/pagefind.js'));
+  assert(existsSync('dist/search-text.json'));
+  assert(existsSync('dist/semantic-worker.js'));
+  assert(existsSync('dist/semantic/manifest.json'));
   const ignored=await readFile('.gitignore','utf8');assert(ignored.includes('dist/'));
 });
 test('全記事のローカルリンクと画像が存在し、関連一覧は自身を含まない',async()=>{

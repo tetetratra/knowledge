@@ -3,12 +3,13 @@ import { createHash } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js';
+import { buildSemantic } from './build-semantic.mjs';
 import { tagRelations } from './tag-relations.mjs';
 import { noteUpdateTimes } from './note-dates.mjs';
 import { normalizeTitle } from '../site/knowledge.js';
 
 const start = performance.now();
-const siteVersion = createHash('sha256').update(await readFile('site/app.js')).update(await readFile('site/site.css')).update(await readFile('site/trail.js')).update(await readFile('site/knowledge.js')).update(await readFile('site/related.js')).digest('hex').slice(0, 12);
+const siteVersion = createHash('sha256').update(await readFile('site/app.js')).update(await readFile('site/site.css')).update(await readFile('site/trail.js')).update(await readFile('site/knowledge.js')).update(await readFile('site/related.js')).update(await readFile('site/semantic.js')).update(await readFile('site/semantic-worker.js')).update(await readFile('site/embedding.js')).update(await readFile('package-lock.json')).digest('hex').slice(0, 12);
 const base = (process.env.BASE_PATH || '/').replace(/\/$/, '') + '/';
 if (!/^\/(?:[a-zA-Z0-9_-]+\/)*$/.test(base)) throw new Error('BASE_PATHが不正');
 const esc = s => String(s).replace(/[&<>"']/g, x => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[x]));
@@ -25,8 +26,9 @@ const pages = await Promise.all(files.map(async file => {
   const id = createHash('sha256').update(file.normalize('NFC')).digest('hex').slice(0, 16);
   const tokens = md.parse(body, {});
   const prose = tokens.flatMap(t => t.type === 'inline' ? (t.children || []).filter(c => ['text','code_inline'].includes(c.type)).map(c => c.content) : []).join(' ');
+  const searchText = tokens.map(token => token.type === 'inline' ? (token.children || []).filter(child => ['text','code_inline'].includes(child.type)).map(child=>child.content).join(' ') : ['fence','code_block'].includes(token.type) ? token.content : '').join(' ');
   const updatedAt = updated.get(`notes/${file.normalize('NFC')}`) ?? Math.floor((await stat(`notes/${file}`)).mtimeMs / 1000);
-  return { id, title, tags, body, updatedAt, text: prose, excerpt: prose.replace(/https?:\/\/\S+/g, '').replace(/\s+/g,' ').trim().slice(0, 110), url: `${base}notes/${id}/`, file };
+  return { id, title, tags, body, updatedAt, text: prose, searchText, excerpt: prose.replace(/https?:\/\/\S+/g, '').replace(/\s+/g,' ').trim().slice(0, 110), url: `${base}notes/${id}/`, file };
 }));
 pages.sort((a, b) => b.updatedAt - a.updatedAt || a.title.localeCompare(b.title, 'ja'));
 if (new Set(pages.map(p => p.id)).size !== pages.length) throw new Error('記事IDが重複');
@@ -125,11 +127,14 @@ for (const page of emptyPages.values()) {
 }
 await writeFile('dist/tag-pages.json', JSON.stringify(tagPages));
 pages.sort((a, b) => b.updatedAt - a.updatedAt || a.title.localeCompare(b.title, 'ja'));
-const content = `<main id="main" class="library-main"><section class="intro" id="top"><h1 class="sr-only">ノート検索</h1><form id="search-form" class="search-box" role="search"><span class="search-symbol" aria-hidden="true">⌕</span><label class="sr-only" for="q">タイトル・本文・タグを検索</label><input id="q" name="q" type="search" placeholder="キーワード・タグで検索" autocomplete="off"></form>${popularTagsHtml}</section><section id="exact-section" class="exact-section" aria-labelledby="exact-title" hidden><div class="section-heading"><h2 id="exact-title">完全一致</h2></div><div id="exact-results" class="note-grid"></div></section><section class="library" aria-labelledby="list-title"><div class="catalog"><div class="section-heading"><h2 id="list-title">すべてのノート</h2><div class="catalog-controls"><span id="result-count" class="muted" role="status" aria-live="polite">${pages.length}件</span></div></div><p id="search-status" class="search-status" role="status" aria-live="polite"></p><div id="results" class="note-grid">${pages.slice(0,100).map(p=>card(p)).join('')}</div><button id="more" class="more-button" type="button">もっと見る</button><noscript><p>検索にはJavaScriptが必要です。</p><details><summary>すべてのノートを表示</summary><ul>${pages.map(p=>`<li><a href="${p.url}">${esc(p.title)}</a></li>`).join('')}</ul></details></noscript></div></section></main>`;
+const content = `<main id="main" class="library-main"><section class="intro" id="top"><h1 class="sr-only">ノート検索</h1><form id="search-form" class="search-box" role="search"><span class="search-symbol" aria-hidden="true">⌕</span><label class="sr-only" for="q">タイトル・本文・タグを検索</label><input id="q" name="q" type="search" placeholder="キーワード・タグで検索" autocomplete="off"></form>${popularTagsHtml}</section><section id="exact-section" class="exact-section" aria-labelledby="exact-title" hidden><div class="section-heading"><h2 id="exact-title">完全一致</h2></div><div id="exact-results" class="note-grid"></div></section><section class="library" aria-labelledby="list-title"><div class="catalog"><div class="section-heading"><h2 id="list-title">すべてのノート</h2><div class="catalog-controls"><span id="result-count" class="muted" role="status" aria-live="polite">${pages.length}件</span></div></div><p id="semantic-status" class="search-status" role="status" aria-live="polite"></p><p id="search-status" class="search-status" role="status" aria-live="polite"></p><div id="results" class="note-grid">${pages.slice(0,100).map(p=>card(p)).join('')}</div><button id="more" class="more-button" type="button">もっと見る</button><noscript><p>検索にはJavaScriptが必要です。</p><details><summary>すべてのノートを表示</summary><ul>${pages.map(p=>`<li><a href="${p.url}">${esc(p.title)}</a></li>`).join('')}</ul></details></noscript></div></section></main>`;
 await writeFile('dist/index.html', shell('Knowledge',content));
 await writeFile('dist/catalog.json', JSON.stringify(pages.map(({id,title,tags,excerpt,url,updatedAt})=>({id,title,tags,excerpt,url,updatedAt}))));
+await writeFile('dist/search-text.json', JSON.stringify(Object.fromEntries(pages.map(page=>[page.id,normalizeTitle(page.searchText)]))));
+const semanticStats = await buildSemantic(pages);
+await cp('node_modules/@huggingface/tokenizers/LICENSE','dist/semantic/tokenizers-LICENSE.txt');
 await writeFile('dist/404.html',shell('ページが見つかりません',`<main id="main" class="article-main"><h1>ページが見つかりません</h1><p><a href="${base}">ノート一覧から探す →</a></p></main>`));
 await writeFile('dist/.nojekyll','');
-const stats = { articles: pages.length, relatedSeconds: +relationSeconds.toFixed(3), generationSeconds: +((performance.now()-start)/1000).toFixed(3) };
+const stats = { semantic:semanticStats, articles: pages.length, relatedSeconds: +relationSeconds.toFixed(3), generationSeconds: +((performance.now()-start)/1000).toFixed(3) };
 await writeFile('dist/build-stats.json', JSON.stringify(stats));
 console.log('サイト生成:',stats);

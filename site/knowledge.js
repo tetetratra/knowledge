@@ -1,28 +1,24 @@
 export const normalizeTitle = value => value.normalize('NFKC').trim().toLowerCase();
-
 export function sortNotes(pages) {
-  return [...pages].sort((a, b) =>
-    (b.updatedAt || 0) - (a.updatedAt || 0) || a.title.localeCompare(b.title, 'ja'));
+  return [...pages].sort((a,b)=>(b.updatedAt || 0)-(a.updatedAt || 0) || a.title.localeCompare(b.title,'ja'));
 }
 
-function searchTier(page, term) {
-  const words = normalizeTitle(term).split(/\s+/);
-  const matches = text => words.every(word => normalizeTitle(text).includes(word));
-  if (matches(page.title)) return 0;
-  if (matches(page.tags.join(' '))) return 1;
-  return 2;
+export function literalMatches(catalog, bodies, term) {
+  const query=normalizeTitle(term);
+  if (!query) return {exact:[],related:sortNotes(catalog)};
+  const words=query.split(/\s+/);
+  const matches=text=>words.every(word=>normalizeTitle(text).includes(word));
+  const tier=page=>normalizeTitle(page.title)===query ? 0 : matches(page.title) ? 1 : matches(page.tags.join(' ')) ? 2 : matches(bodies[page.id] || '') ? 3 : 4;
+  const ranked=catalog.map(page=>({page,tier:tier(page)})).filter(item=>item.tier<4)
+    .sort((a,b)=>a.tier-b.tier || (b.page.updatedAt || 0)-(a.page.updatedAt || 0) || a.page.title.localeCompare(b.page.title,'ja'));
+  return {exact:ranked.filter(item=>item.tier===0).map(item=>item.page),related:ranked.filter(item=>item.tier>0).map(item=>item.page)};
 }
 
-export function splitMatches(catalog, matched, term) {
-  if (!term.trim()) return { exact: [], related: sortNotes(catalog) };
-  const exact = catalog.filter(page => normalizeTitle(page.title) === normalizeTitle(term));
-  const exactIds = new Set(exact.map(page => page.id));
-  const candidates = new Map(matched.map(page => [page.id, page]));
-  // 検索エンジンが単語の区切りで落としたタイトル・タグの部分一致も拾う。
-  for (const page of catalog) if (searchTier(page, term) < 2 && !candidates.has(page.id)) candidates.set(page.id, page);
-  const related = [...candidates.values()].filter(page => !exactIds.has(page.id)).sort((a, b) =>
-    searchTier(a, term) - searchTier(b, term) ||
-    (a.searchRank ?? Number.MAX_SAFE_INTEGER) - (b.searchRank ?? Number.MAX_SAFE_INTEGER) ||
-    a.title.localeCompare(b.title, 'ja'));
-  return { exact: sortNotes(exact), related };
+export function appendSemantic(catalog, literal, semantic) {
+  const seen=new Set([...literal.exact,...literal.related].map(page=>page.id));
+  const byId=new Map(catalog.map(page=>[page.id,page]));
+  return semantic.flatMap(({id})=>{
+    if (seen.has(id) || !byId.has(id)) return [];
+    seen.add(id);return [byId.get(id)];
+  });
 }

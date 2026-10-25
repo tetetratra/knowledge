@@ -32,11 +32,16 @@ jobs:
       - run: npm ci
       - name: 原稿を検証
         run: python3 scripts/validate.py
+      - name: 埋め込みモデルをキャッシュ
+        uses: actions/cache@v4
+        with:
+          path: work/embedding-model
+          key: static-embedding-japanese-95b3d9c80a7ccf604e2b5daee7b1b3eed6b1a9d3
       - name: サイトと検索インデックスを生成
         run: npm run build
         env:
           BASE_PATH: ${{ steps.pages.outputs.base_path }}/
-      - name: 関連度と生成サイトを検証
+      - name: 検索と生成サイトを検証
         run: npm test
       - name: 計算時間を記録
         run: cat dist/build-stats.json >> "$GITHUB_STEP_SUMMARY"
