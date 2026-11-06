@@ -1,5 +1,5 @@
 ---
-tags: "Ruby_on_Rails, Ruby_on_Rails_model, find_each や in_batchesはクエリキャッシュが無効化されている, リードレプリカ, find_each, preload, N+1"
+tags: "Ruby_on_Rails, Ruby_on_Rails_model, find_each や in_batchesはクエリキャッシュが無効化されている, リードレプリカ, find_each, preload, N+1, distribute_reads, 複数データベース"
 ---
 
 # ActiveRecord
@@ -26,6 +26,17 @@ ApplicationRecord.connected_to(role: リードレプリカ) do # まずリード
 
 ```
 
+- リードレプリカへの振り分けは、Rails 6.0 以降は標準の複数データベース機能でできる
+  - [Rails ガイド「Active Record で複数のデータベースを利用する」](https://guides.rubyonrails.org/active_record_multiple_databases.html)
+  - 接続先の登録：`connects_to database: { writing: :primary, reading: :primary_replica }`
+  - ブロック単位の切り替え：`ActiveRecord::Base.connected_to(role: :reading) { ... }`
+    - レプリカに向いている間に書き込むとエラーになる
+  - リクエスト単位の自動切り替え：`ActiveRecord::Middleware::DatabaseSelector`
+    - GET と HEAD はレプリカ、それ以外は主 DB に振り分ける
+    - 書き込みの直後（既定は2秒）は主 DB を読むので、書いたばかりのデータが見えない問題を防げる
+  - gem の `distribute_reads`（`distribute_reads { ... }` のブロックでレプリカを読む）は、標準機能が入る前からある手段
+    - `failover: true` で、レプリカにつながらないときに主 DB を読ませられる
+    - [ankane/distribute_reads](https://github.com/ankane/distribute_reads)
 - クエリがリードレプリカに接続されているか調べる方法 → クエリログに接続先を加えてあげる
   - [ruby on rails - Include the role of Active Record queries in logs - Stack Overflow](https://stackoverflow.com/questions/68539123/include-the-role-of-active-record-queries-in-logs)
 ```rb
