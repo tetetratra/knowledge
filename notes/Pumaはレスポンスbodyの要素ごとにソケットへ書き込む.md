@@ -1,5 +1,5 @@
 ---
-tags: "Ruby_on_Rails, Rack, Puma, Grape, HTTP, ストリーミング"
+tags: "Ruby_on_Rails, Rack, Puma, Grape, HTTP, ストリーミング, エラー処理"
 ---
 
 # Pumaはレスポンスbodyの要素ごとにソケットへ書き込む
@@ -32,3 +32,7 @@ end
   - [grape の lib/grape/dsl/inside_route.rb](https://github.com/ruby-grape/grape/blob/v1.8.0/lib/grape/dsl/inside_route.rb)
 - Grape の`stream`は`Cache-Control: no-cache`を付けるが、Rack 2.2 の`Rack::ETag`は`Cache-Control`を見ないので、body を溜め込まれる
 - 見出しと本文の列は`[header].chain(rows)`でつなげると、遅延評価のまま body に渡せる
+- body を書いている途中で例外が起きても、ステータスとヘッダーは送信済みなので変えられない
+  - Puma 4.3 は`process_client`で例外を拾い、`client.write_error(500)`で 500 の固定の応答文字列をソケットにそのまま書いてから、接続を閉じる（[puma の lib/puma/client.rb](https://github.com/puma/puma/blob/v4.3.12/lib/puma/client.rb)）
+  - クライアントからは、チャンク形式の途中に読めないデータが来て、接続が切れたように見える
+  - アプリのエラー処理（Grape の`rescue_from`など）は、エンドポイントの処理が終わっているので働かない
