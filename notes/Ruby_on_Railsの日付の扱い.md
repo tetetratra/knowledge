@@ -15,6 +15,9 @@ tags: "Ruby_on_Rails, Ruby_on_Rails_Tips, タイムゾーン, Docker, ActiveReco
       - OSのタイムゾーン設定
         - →Asia/Tokyo
           - Dockerファイルやdocker-compose.ymlの設定でAsia/Tokyoにする
+        - cron で動かす定期処理の時刻は、OS のタイムゾーンで読まれる
+          - whenever の `schedule.rb` に書いた時刻も、crontab に書き出されて cron が読むので同じ
+          - Rails の `config.time_zone` は効かない。OS が UTC なら「15:00」は日本時間の 0:00 になる
       - Railsのタイムゾーン設定
         - → config/application.rb内で、`config.time_zone = 'Tokyo'`を設定する
       - ActiveRecordでレコードを読み書きする際のタイムゾーン設定

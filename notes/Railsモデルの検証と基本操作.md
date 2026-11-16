@@ -1,8 +1,8 @@
 ---
-tags: "Ruby_on_Rails, マイグレーション, Ruby_on_Rails_マイグレーション, scope, bulk_insert, bulk, JSON型, SQL, Ruby_on_Rails_test"
+tags: "Ruby_on_Rails, マイグレーション, Ruby_on_Rails_マイグレーション, scope, bulk_insert, bulk, JSON型, SQL, Ruby_on_Rails_test, ActiveRecord"
 ---
 
-# Rails model: モデルの検証と基本操作
+# Railsモデルの検証と基本操作
 
 - マイグレーションや、テーブル定義関連の話は Ruby on Rails マイグレーション へ
   - `ActiveModel::Model`をincludeすると、DBに保存しないモデルを扱える
@@ -94,3 +94,8 @@ end
 
 
 ```
+
+- `new` したときの属性の初期値には、DB のカラムの既定値が使われる
+  - 既定値は `Model.column_defaults` で見られる（[ActiveRecord::ModelSchema::ClassMethods](https://api.rubyonrails.org/classes/ActiveRecord/ModelSchema/ClassMethods.html#method-i-column_defaults)）
+  - そのため、`default: "draft", null: false` のカラムに値を渡さずに `new` しても、保存前の `validates :カラム, presence: true` は通る
+  - 既定値はモデルのコードではなくスキーマにあるので、ファクトリーやモデルを読んでも見つからない
