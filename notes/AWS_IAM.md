@@ -1,5 +1,5 @@
 ---
-tags: "AWS, IAM, IAMユーザー, IAMグループ, IAMロール, IAMポリシー, Assume Role"
+tags: "AWS, IAM, IAMユーザー, IAMグループ, IAMロール, IAMポリシー, Assume Role, スイッチロール"
 ---
 
 # AWS IAM
@@ -49,5 +49,12 @@ role ---|1..*| policy
     - EC2：[Demystifying EC2 Resource-Level Permissions \| AWS Security Blog](https://aws.amazon.com/jp/blogs/security/demystifying-ec2-resource-level-permissions/)
 - Assume Role
   - 他のロールの権限を引き受けた状態にする機能
+  - マネジメントコンソールのスイッチロール
+    - コンソール標準のロール履歴は直近5件までしか残らない
+    - Chrome 拡張 [AWS Extend Switch Roles](https://github.com/tilfinltd/aws-extend-switch-roles) は、履歴ではなく自分で設定したロールの一覧をメニューに出す
+      - 設定は `~/.aws/config` と同じ INI 形式で、拡張のテキストボックスに書く（ローカルの `~/.aws/config` は読まない）
+      - 1つのロールは `role_arn`、または `aws_account_id` と `role_name` の組で指定する
+      - `source_profile` で、サインインしたベースアカウントごとに出すロールを分けられる
+      - SSO や SAML で直接サインインしたアカウント間の切り替えには対応しない
 - [GitHub ActionsからECSとECRへのCI/CDを最小権限で実行したい | DevelopersIO](https://dev.classmethod.jp/articles/github-actions-ecs-ecr-minimum-iam-policy/)
   - 最小限の権限を探るときの雰囲気をつかめる
