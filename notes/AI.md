@@ -1,5 +1,5 @@
 ---
-tags: "Stable Diffusion, LoRA, ファインチューニング, 転移学習"
+tags: "AI, LLM, Stable Diffusion, LoRA, ファインチューニング, 転移学習, 推論エンジン, 量子化, vLLM, Ollama"
 ---
 
 # AI
@@ -39,6 +39,26 @@ tags: "Stable Diffusion, LoRA, ファインチューニング, 転移学習"
   - GPT-4
   - PaLM (Google)
   - LLaMA (Meta)
+- LLMの推論エンジンとモデルは別物
+  - LLMを動かす仕組みは、モデルと推論エンジンという別々のものに分かれる
+    - モデル（Llama、Qwenなど）は、学習済みの重みを収めたデータで、それだけでは動かない
+    - 推論エンジン（vLLM、SGLang、Ollama、llama.cppなど）は、モデルのファイルを読み込み、GPUやCPUで計算して出力を作るソフトウェア
+    - 音楽ファイルと再生ソフトの関係に近い
+  - 全体は「UI・アプリ → 推論エンジン → モデル → ハードウェア（GPU、CPU）」の4層になる
+    - UI・アプリ（Open WebUI、Difyなど）は、推論エンジンをHTTPのAPI越しに呼ぶ
+    - vLLMもOllamaもOpenAI互換のAPIを出しており、Open WebUIはOllamaとOpenAI互換APIのどちらにもつながる
+  - 推論エンジンは、想定する使い方で作りが違う
+    - vLLMとSGLangは、サーバーで多数のリクエストをさばくためのもの。vLLMは届いたリクエストをまとめて計算し（continuous batching）、スループットを上げる
+    - llama.cppは、幅広いハードウェアで少ない準備で動かすことを目標にする。Ollamaはllama.cppをバックエンドに持つ
+  - 出力の賢さは、基本的に推論エンジンではなく、読み込む重みで決まる
+    - 量子化は、重みの精度を下げて（例：32ビット浮動小数点 → 4ビット整数）、ファイルとメモリ使用量を小さくする処理。精度が少し落ちることがある
+    - vLLMも量子化したモデルを動かせる。精度の差は「どの推論エンジンか」ではなく「量子化した重みを使うか」で生まれる
+  - 出典
+    - [vLLM ドキュメント](https://docs.vllm.ai/en/latest/)（特徴、OpenAI互換サーバー、対応する量子化形式）
+    - [SGLang ドキュメント](https://docs.sglang.io/)
+    - [llama.cpp README](https://github.com/ggml-org/llama.cpp)、[llama.cpp quantize README](https://github.com/ggml-org/llama.cpp/blob/master/tools/quantize/README.md)
+    - [Ollama README](https://github.com/ollama/ollama)、[Ollama OpenAI compatibility](https://docs.ollama.com/api/openai-compatibility)
+    - [Open WebUI ドキュメント](https://docs.openwebui.com/)
 - open-interpreter
   - https://github.com/KillianLucas/open-interpreter
   - [Open Interpreterの動かし方 | データアナリティクスラボ](https://dalab.jp/archives/journal/how-to-use-open-interpreter/)
